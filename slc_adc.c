@@ -89,7 +89,7 @@ uint16_t slc_ADCGetLatestValue(uint16_t channel)
 }
 void isr_adc(void)
 {
-	int16_t *p_buff = (int16_t*)(&ADC1BUF0);
+	uint16_t *p_buff = (uint16_t*)(&ADC1BUF0);
     int i;
     for(i = 0; i < ANALOG_INPUTS; i++)
     {

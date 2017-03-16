@@ -13,5 +13,6 @@ int main(int argc, char** argv)
     SYSTEMConfigPerformance(SYSCLK);
     mOSCSetPBDIV(OSC_PB_DIV_2); // This is necessary since SYSTEMConfigPerformance defaults FPBDIV to DIV_1
 
+    slc_PWMInit(1000, 50);
     return 0;
 }

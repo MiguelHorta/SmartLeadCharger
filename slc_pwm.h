@@ -15,30 +15,34 @@
  */
 /* ************************************************************************** */
 
-#ifndef SLC_UTIL_H    /* Guard against multiple inclusion */
-#define SLC_UTIL_H
+#ifndef SLC_PWM_H    /* Guard against multiple inclusion */
+#define SLC_PWM_H
 
+#include <stdint.h>
+#define _SUPPRESS_PLIB_WARNING 1
+#include <p32xxxx.h>
+#include <plib.h>
+#include "slc_util.h"
 
 /* ************************************************************************** */
 /* ************************************************************************** */
 /* Section: Included Files                                                    */
 /* ************************************************************************** */
 /* ************************************************************************** */
-#include <stdbool.h>
-#include <stdint.h>
+
+/* This section lists the other files that are included in this file.
+ */
+
+/* TODO:  Include other files here if needed. */
+
 
 /* Provide C++ Compatibility */
 #ifdef __cplusplus
 extern "C" {
 #endif
-    #define SYSCLK 80000000L // System clock frequency, in Hz
-    #define PBUSCLK 40000000L // Peripheral bus clock
 
-    
-    void slc_clamp(uint16_t *n, int lower, int upper );
-
-
-    /* Provide C++ Compatibility */
+void slc_SetDutyCycle(uint8_t dutyCycle);
+void slc_PWMInit(uint16_t freq, uint8_t dutyCycle);
 #ifdef __cplusplus
 }
 #endif

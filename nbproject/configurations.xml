@@ -17,6 +17,7 @@
                    projectFiles="true">
       <itemPath>adc.c</itemPath>
       <itemPath>main.c</itemPath>
+      <itemPath>slc_io.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

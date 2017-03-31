@@ -38,7 +38,7 @@ extern "C" {
     {
         uint8_t active;
         uint8_t channel; //irrelevant
-        uint16_t value;
+        volatile uint16_t value;
         
     } slc_ADCHandler;
     // *****************************************************************************

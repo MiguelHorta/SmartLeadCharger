@@ -30,7 +30,8 @@
 #include "slc_util.h"
 
 #define ANALOG_INPUTS 16
-static struct slc_ADCHandler f_inputs[ANALOG_INPUTS];
+static volatile struct slc_ADCHandler f_inputs[ANALOG_INPUTS];
+void isr_adc(void);
 
 int slc_ADCInit(void)
 {
@@ -38,8 +39,8 @@ int slc_ADCInit(void)
     for(i = 0; i < ANALOG_INPUTS; i++)
     {
         f_inputs[i].active = 0;
-        f_inputs[i].channel = i+1;
-        f_inputs[i].value = 0;
+        f_inputs[i].channel = i;
+        f_inputs[i].value = i;
     }
 	/* Interruptions */
     void __attribute__( (interrupt(IPL2AUTO), vector(_ADC_VECTOR))) isr_adc(void);
@@ -63,8 +64,10 @@ void slc_ADCStart(void)
 {
     // Enable module
     AD1CON1bits.ON = 1;         // Enable A/D module (This must be the ***last instruction of configuration phase***)
-	/*end - ADC*/
-	AD1CON1bits.ASAM = 1;
+	IFS1bits.AD1IF = 0;
+    /*end - ADC*/
+    f_inputs[1].value = 18;
+    AD1CON1bits.ASAM = 1;
 }
 
 void slc_ADCReset(void)
@@ -75,10 +78,10 @@ void slc_ADCReset(void)
 void slc_ADCQueueInput(uint16_t channel)
 {
     slc_clamp(&channel, 0, 15);
-    f_inputs[channel].active = 1;
+    f_inputs[channel].active = true;
     /* Config entradas como analogicas*/
-	TRISB = TRISB | ( 1 << (channel+1)); // primeiro dizer que é um input
-	AD1PCFG = AD1PCFG & !(1 << (channel+1)); // depois dizer que é analogico 16 bits
+	TRISB = TRISB | ( 1 << (channel)); // primeiro dizer que é um input
+	AD1PCFG = AD1PCFG & !(1 << (channel)); // depois dizer que é analogico 16 bits
     AD1CSSL |= ( 1 << channel);
 	/*end*/
 }
@@ -95,7 +98,9 @@ void isr_adc(void)
     {
         if(f_inputs[i].active)
         {
-            f_inputs[i].value = (*(p_buff++) + f_inputs[i].value)/2;
+            LATEbits.LATE0 = !LATEbits.LATE0;
+            f_inputs[i].value = 5; //(*p_buff + f_inputs[i].value)/2;
+            p_buff++;
         }
     }
 	IFS1bits.AD1IF = 0;

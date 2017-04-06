@@ -36,7 +36,7 @@ void slc_PWMInit(uint16_t freq, uint8_t dutyCycle)
 	// INterrupçoes para o timer "
 	IFS0bits.T2IF = 0;
 	IEC0bits.T2IE = 1;
-	IPC2bits.T2IP = 6;
+	IPC2bits.T2IP = 5;
 	// PWM
 	OC1CONbits.OCM = 6; // Pin desejado OCx
 	OC1CONbits.OCTSEL = 0; // 0 -> T2 1-> T3 
@@ -47,7 +47,7 @@ void slc_PWMInit(uint16_t freq, uint8_t dutyCycle)
 	
 }
 
-void isr_pwm(void)
+void __attribute__( (interrupt(IPL5AUTO), vector(_TIMER_2_VECTOR))) isr_pwm(void)
 {
 	IFS0bits.T2IF = 0;
 }

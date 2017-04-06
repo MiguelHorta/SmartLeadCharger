@@ -29,6 +29,9 @@
 #define _SUPPRESS_PLIB_WARNING 1
 #include <p32xxxx.h>
 #include <plib.h>
+
+#define ADC_EMITTER_PIN 0
+
 /* Provide C++ Compatibility */
 #ifdef __cplusplus
 extern "C" {
@@ -41,6 +44,7 @@ extern "C" {
         volatile uint16_t value;
         
     } slc_ADCHandler;
+    
     // *****************************************************************************
     // *****************************************************************************
     // Section: Interface Functions

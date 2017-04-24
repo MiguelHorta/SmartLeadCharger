@@ -1,0 +1,4 @@
+PINs
+RD0/OC1     - PWM voltage regultor
+RD1/OC2     - PWM FAN
+RB0         - ADC

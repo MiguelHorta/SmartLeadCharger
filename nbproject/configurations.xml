@@ -6,7 +6,7 @@
                    projectFiles="true">
       <itemPath>slc_adc.h</itemPath>
       <itemPath>slc_util.h</itemPath>
-      <itemPath>slc_pwm.h</itemPath>
+      <itemPath>slc_voltage_regulator.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -19,8 +19,8 @@
       <itemPath>slc_adc.c</itemPath>
       <itemPath>main.c</itemPath>
       <itemPath>slc_io.c</itemPath>
-      <itemPath>slc_pwm.c</itemPath>
       <itemPath>slc_util.c</itemPath>
+      <itemPath>slc_voltage_regulator.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

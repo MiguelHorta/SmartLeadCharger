@@ -4,7 +4,7 @@
 #define _SUPPRESS_PLIB_WARNING 1
 #include <plib.h>
 #include "slc_adc.h"
-#include "slc_pwm.h"
+#include "slc_voltage_regulator.h"
 
 #define SYSCLK 80000000L // System clock frequency, in Hz
 #define PBUSCLK 40000000L // Peripheral bus clock
@@ -21,15 +21,15 @@ int main(int argc, char** argv)
     setvbuf ( stdout , NULL , _IONBF , 0 );
     
     
-    printf("Start!");
-    slc_PWMInit(1000, 50);
+    puts("Start!");
     slc_ADCInit();
-    slc_ADCQueueInput(ADC_EMITTER_PIN);
+    slc_ADCQueueInput(ADC_EMITTER);
     slc_ADCStart();
+    slc_InitVoltageRegulator();
     while(1)
     {
         int i;
-        for(i = 0;  i < 16; i++)
+        for(i = 0;  i < 3; i++)
         {
         printf("R%d: %d\n", i, slc_ADCGetLatestValue(i));
         }

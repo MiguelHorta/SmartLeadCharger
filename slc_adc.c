@@ -30,7 +30,7 @@
 #include "slc_util.h"
 
 #define ANALOG_INPUTS 16
-static volatile struct slc_ADCHandler f_inputs[ANALOG_INPUTS];
+static volatile struct slc_ADCHandler _adc_aquisitions[ANALOG_INPUTS];
 void isr_adc(void);
 
 int slc_ADCInit(void)
@@ -38,9 +38,9 @@ int slc_ADCInit(void)
     int i;
     for(i = 0; i < ANALOG_INPUTS; i++)
     {
-        f_inputs[i].active = 0;
-        f_inputs[i].channel = i;
-        f_inputs[i].value = i;
+        _adc_aquisitions[i].active = 0;
+        _adc_aquisitions[i].channel = i;
+        _adc_aquisitions[i].value = i;
     }
 	/* Interruptions */
 	IFS1bits.AD1IF = 0;
@@ -52,9 +52,11 @@ int slc_ADCInit(void)
 	AD1CON1bits.CLRASAM = 1;    //Stop conversion when 1st A/D converter interrupt is generated and clears ASAM bit automatically
 	AD1CON1bits.FORM = 0;       // Integer 16 bit output format
     AD1CON2bits.VCFG = 0;       // VR+=AVdd; VR-=AVss
-    AD1CON2bits.SMPI = 0;        // Number (+1) of consecutive conversions, stored in ADC1BUF0...ADCBUF{SMPI}
-    AD1CON3bits.ADRC = 1;       // ADC uses internal RC clock
-    AD1CON3bits.SAMC = 31;      // Sample time is 16TAD ( TAD = 100ns)
+    AD1CON2bits.SMPI = -1;        // Number (+1) of consecutive conversions, stored in ADC1BUF0...ADCBUF{SMPI}
+    AD1CON3bits.ADRC = 1;       // ADC uses PBCLOCK with prescaler
+    //AD1CON3bits.ADCS = 0xFF;    // precaler at maximum 256
+    AD1CON3bits.SAMC = 16;      // Sample time is 16TAD ( TAD = 100ns)
+    AD1CHSbits.CH0NA =  0;
     AD1CON2bits.CSCNA = 1;
     
 }
@@ -74,7 +76,9 @@ void slc_ADCReset(void)
 void slc_ADCQueueInput(uint16_t channel)
 {
     slc_clamp(&channel, 0, 15);
-    f_inputs[channel].active = true;
+    AD1CON2bits.SMPI += 1;
+    
+    _adc_aquisitions[channel].active = true;
     /* Config entradas como analogicas*/
 	TRISB |= ( 1 << channel); // primeiro dizer que é um input
 	AD1PCFG &= !(1 << channel); // depois dizer que é analogico 16 bits
@@ -82,10 +86,10 @@ void slc_ADCQueueInput(uint16_t channel)
     AD1CSSL |= ( 1 << channel);
 	/*end*/
 }
-uint16_t slc_ADCGetLatestValue(uint16_t channel)
+int3float slc_ADCGetLatestValue(uint16_t channel)
 {
     slc_clamp(&channel, 0, 15);
-	return f_inputs[channel].value;	
+	return _adc_aquisitions[channel].value;	
 }
 void __attribute__( (interrupt(IPL5AUTO), vector(_ADC_VECTOR))) isr_adc(void)
 {
@@ -93,8 +97,9 @@ void __attribute__( (interrupt(IPL5AUTO), vector(_ADC_VECTOR))) isr_adc(void)
     int i;
     for(p_buff = (uint16_t*)(&ADC1BUF0), i = 0; p_buff <= (uint16_t*)(&ADC1BUFF) && i < ANALOG_INPUTS; p_buff += 8, i++)
     {
-        f_inputs[i].value = (*p_buff*3300+511)/1023;
+        _adc_aquisitions[i].value = (*p_buff*3300)/1023; //((*p_buff*3300)/1023 + _adc_aquisitions[i].value)/2;
     }
+    AD1CON1bits.ASAM = 1;
 	IFS1bits.AD1IF = 0;
 }
 

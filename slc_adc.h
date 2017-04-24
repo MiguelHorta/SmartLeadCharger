@@ -29,8 +29,9 @@
 #define _SUPPRESS_PLIB_WARNING 1
 #include <p32xxxx.h>
 #include <plib.h>
+#include "slc_util.h"
 
-#define ADC_EMITTER_PIN 0
+#define ADC_EMITTER 0 //RB0
 
 /* Provide C++ Compatibility */
 #ifdef __cplusplus
@@ -41,7 +42,7 @@ extern "C" {
     {
         uint8_t active;
         uint8_t channel; //irrelevant
-        volatile uint16_t value;
+        volatile int3float value;
         
     } slc_ADCHandler;
     

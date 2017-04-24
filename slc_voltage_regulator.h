@@ -15,8 +15,8 @@
  */
 /* ************************************************************************** */
 
-#ifndef SLC_PWM_H    /* Guard against multiple inclusion */
-#define SLC_PWM_H
+#ifndef SLC_VOLTAGE_REGULATOR_H    /* Guard against multiple inclusion */
+#define SLC_VOLTAGE_REGULATOR_H
 
 #include <stdint.h>
 #define _SUPPRESS_PLIB_WARNING 1
@@ -35,14 +35,23 @@
 
 /* TODO:  Include other files here if needed. */
 
+//#define VOLTAGE_REGULATOR_OUTPUT 0
 
 /* Provide C++ Compatibility */
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-void slc_SetDutyCycle(uint8_t dutyCycle);
-void slc_PWMInit(uint16_t freq, uint8_t dutyCycle);
+    void slc_InitVoltageRegulator(); // output starting at RD0
+    void slc_SetMaxVoltage(int3float voltage); // the last 3 cases are decimal, 4 case is the unity
+    void slc_SetMaxCurrent(int3float current); // the last 3 cases are decimal, 4 case is the unity
+    // Calibration factors
+    void slc_SetCFMinVoltage(int3float);
+    void slc_SetCFMaxVoltage(int3float);
+    //Variation in voltage when the duty-cycle is increased by 1%
+    //XXX It assumed to be linear
+    void slc_SetCFVoltageVariation(int3float);
+    //update
+    void onTick(void);
 #ifdef __cplusplus
 }
 #endif

@@ -15,8 +15,8 @@
  */
 /* ************************************************************************** */
 
-#ifndef SLC_VOLTAGE_REGULATOR_H    /* Guard against multiple inclusion */
-#define SLC_VOLTAGE_REGULATOR_H
+#ifndef SLC_OSCILATORS_H    /* Guard against multiple inclusion */
+#define SLC_OSCILATORS_H
 
 #include <stdint.h>
 #define _SUPPRESS_PLIB_WARNING 1
@@ -41,7 +41,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    void slc_InitVoltageRegulator(); // output starting at RD0
+    void slc_InitOscilators(uint16_t freq);
+    void slc_QueueBaseRegulator(int3float initial_max_voltage, int3float initial_max_current);
+    void slc_QueueFanRegulator(int3float initial_working_temp);
+     
     void slc_SetMaxVoltage(int3float voltage); // the last 3 cases are decimal, 4 case is the unity
     void slc_SetMaxCurrent(int3float current); // the last 3 cases are decimal, 4 case is the unity
     // Calibration factors
@@ -50,6 +53,7 @@ extern "C" {
     //Variation in voltage when the duty-cycle is increased by 1%
     //XXX It assumed to be linear
     void slc_SetCFVoltageVariation(int3float);
+    
     //update
     void onTick(void);
 #ifdef __cplusplus

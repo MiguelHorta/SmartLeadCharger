@@ -103,6 +103,32 @@ void __attribute__( (interrupt(IPL5AUTO), vector(_ADC_VECTOR))) isr_adc(void)
 	IFS1bits.AD1IF = 0;
 }
 
+int3float slc_CurrentValue()
+{
+    // TODO apply corrections
+    return slc_ADCGetLatestValue(ADC_CURRENT);
+}
+int3float slc_VredValue()
+{
+    // TODO apply corrections
+    return slc_ADCGetLatestValue(ADC_VRED);
+}
+int3float slc_BattValue()
+{
+    // TODO apply corrections
+    return slc_ADCGetLatestValue(ADC_BATT);
+}
+int3float slc_TempIntValue()
+{
+    // TODO apply corrections
+    return slc_ADCGetLatestValue(ADC_TEMP_INT);
+}
+int3float slc_TempBattValue()
+        {
+    // TODO apply corrections
+    return slc_ADCGetLatestValue(ADC_TEMP_BATT);
+}
+
 /* *****************************************************************************
  End of File
  */

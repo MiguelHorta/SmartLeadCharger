@@ -4,7 +4,7 @@
 #define _SUPPRESS_PLIB_WARNING 1
 #include <plib.h>
 #include "slc_adc.h"
-#include "slc_voltage_regulator.h"
+#include "slc_oscilators.h"
 
 #define SYSCLK 80000000L // System clock frequency, in Hz
 #define PBUSCLK 40000000L // Peripheral bus clock
@@ -20,16 +20,25 @@ int main(int argc, char** argv)
     setvbuf ( stdin , NULL , _IONBF , 0 );
     setvbuf ( stdout , NULL , _IONBF , 0 );
     
-    
-    puts("Start!");
+    /* Readings */
     slc_ADCInit();
-    slc_ADCQueueInput(ADC_EMITTER);
+    slc_ADCQueueInput(ADC_CURRENT);
+    slc_ADCQueueInput(ADC_VRED);
+    slc_ADCQueueInput(ADC_BATT);
+    slc_ADCQueueInput(ADC_TEMP_INT);
+    slc_ADCQueueInput(ADC_TEMP_BATT);
     slc_ADCStart();
-    slc_InitVoltageRegulator();
+    
+    /* Actuators */
+    slc_InitOscilators(1000);
+    slc_QueueBaseRegulator(5000, 0200);
+    slc_QueueFanRegulator(40000);
+    
+    
     while(1)
     {
         int i;
-        for(i = 0;  i < 3; i++)
+        for(i = 0;  i < 5; i++)
         {
         printf("R%d: %d\n", i, slc_ADCGetLatestValue(i));
         }

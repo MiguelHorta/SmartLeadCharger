@@ -1,4 +1,15 @@
 PINs
+
+Timer 2 -> Osciladores
 RD0/OC1     - PWM voltage regultor
 RD1/OC2     - PWM FAN
-RB0         - ADC
+
+
+Portos B todos para a ADC
+AN0/RB0     - Current adc
+AN1/RB1     - Vred adc
+AN2/RB2     - BATT adc
+AN3/RB3     - Temp int adc
+AN4/RB4     - Temp batt adc
+
+Timer 4 -> Interrupt para equação de controlo

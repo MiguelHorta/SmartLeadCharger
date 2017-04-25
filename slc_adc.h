@@ -31,7 +31,11 @@
 #include <plib.h>
 #include "slc_util.h"
 
-#define ADC_EMITTER 0 //RB0
+#define ADC_CURRENT   0 //RB0
+#define ADC_VRED      1 //RB1
+#define ADC_BATT      2 //RB2
+#define ADC_TEMP_INT  3 //RB3
+#define ADC_TEMP_BATT 4 //RB4
 
 /* Provide C++ Compatibility */
 #ifdef __cplusplus
@@ -55,9 +59,13 @@ extern "C" {
     void slc_ADCStart(void);
     void slc_ADCReset(void);
     void slc_ADCQueueInput(uint16_t channel);
-    uint16_t slc_ADCGetLatestValue(uint16_t channel);
 
-
+    int3float slc_ADCGetLatestValue(uint16_t channel);
+    int3float slc_CurrentValue();
+    int3float slc_VredValue();
+    int3float slc_BattValue();
+    int3float slc_TempIntValue();
+    int3float slc_TempBattValue();
 
 #ifdef __cplusplus
 }

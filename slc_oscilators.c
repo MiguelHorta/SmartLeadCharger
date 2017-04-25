@@ -2,8 +2,8 @@
 #include "slc_adc.h"
 
 uint16_t f_freq;
-int3float f_max_voltage;
-int3float f_max_current;
+static int3float f_max_voltage;
+static int3float f_max_current;
 
 void slc_TimerInit(uint16_t freq);
 
@@ -12,7 +12,7 @@ void slc_InitOscilators(uint16_t freq)
     slc_TimerInit(freq);
 }
 
-void getConstants(int freq,int *prescaler, int *value)
+static void getConstants(int freq,int *prescaler, int *value)
 {
 	const int MAX_VALUE = 65535;
 	const int prescaler_values[] = {1,2,4,8,16,32,64,256};
@@ -45,11 +45,12 @@ void slc_TimerInit(uint16_t freq)
 	IPC2bits.T2IP = 5;
 	
 }
+static uint8_t base_duty_cycle;
 void slc_SetBasePWM(uint8_t dutyCycle)
 {
 	dutyCycle = dutyCycle > 100 ? 100 : dutyCycle;
 	dutyCycle = dutyCycle < 0 ? 0 : dutyCycle;
-	
+	base_duty_cycle = dutyCycle;
 	OC1RS = (PR2+1)*(dutyCycle)/100;
 }
 void slc_QueueBaseRegulator(int3float initial_max_voltage, int3float initial_max_current)
@@ -60,24 +61,36 @@ void slc_QueueBaseRegulator(int3float initial_max_voltage, int3float initial_max
 	OC1CONbits.ON = 1;
 }
 
+static uint8_t fan_duty_cycle;
 void slc_SetFanPWM(uint8_t dutyCycle)
 {
 	dutyCycle = dutyCycle > 100 ? 100 : dutyCycle;
 	dutyCycle = dutyCycle < 0 ? 0 : dutyCycle;
-	
+	fan_duty_cycle = dutyCycle;
 	OC2RS = (PR2+1)*(dutyCycle)/100;
 }
+
+static int3float working_temp;
 void slc_QueueFanRegulator(int3float initial_working_temp)
 {
+    working_temp = initial_working_temp;
     OC2CONbits.OCM = 6; // Output Compare Mode Select bits; 6 -> PWM mode on OCx; Fault pin disabled
 	OC2CONbits.OCTSEL = 0; // 0 -> T2 1-> T3 
 	slc_SetFanPWM(0);
 	OC2CONbits.ON = 1;
 }
-void onTick(void)
+
+static float k_fan = 0.01;
+void onFanTick(void)
 {
-    slc_SetFanPWM(0);
-    slc_SetBasePWM(0);
+    uint8_t duty_cycle = 0;
+    duty_cycle = k_fan*(slc_TempIntValue() - working_temp);
+    slc_SetFanPWM(duty_cycle);
+}
+
+void onBaseTick(void)
+{
+    slc_SetBasePWM(10);
 }
 void __attribute__( (interrupt(IPL5AUTO), vector(_TIMER_2_VECTOR))) isr_pwm(void)
 {

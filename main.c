@@ -5,6 +5,7 @@
 #include <plib.h>
 #include "slc_adc.h"
 #include "slc_oscilators.h"
+#include "slc_control_loop.h"
 
 #define SYSCLK 80000000L // System clock frequency, in Hz
 #define PBUSCLK 40000000L // Peripheral bus clock
@@ -30,10 +31,13 @@ int main(int argc, char** argv)
     slc_ADCStart();
     
     /* Actuators */
-    slc_InitOscilators(1000);
+    //ODCDbits.ODCD0 = 1;
+    slc_InitOscilators(5000);
     slc_QueueBaseRegulator(5000, 0200);
     slc_QueueFanRegulator(40000);
     
+    /* Control Loop */
+    slc_InitControlLoop(1000);
     
     while(1)
     {

@@ -90,7 +90,7 @@ void onFanTick(void)
 
 void onBaseTick(void)
 {
-    slc_SetBasePWM(10);
+    slc_SetBasePWM(60);
 }
 void __attribute__( (interrupt(IPL5AUTO), vector(_TIMER_2_VECTOR))) isr_pwm(void)
 {

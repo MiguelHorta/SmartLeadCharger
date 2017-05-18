@@ -121,7 +121,8 @@ int3float slc_BattValue()
 int3float slc_TempIntValue()
 {
     // TODO apply corrections
-    return slc_ADCGetLatestValue(ADC_TEMP_INT);
+    //return slc_ADCGetLatestValue(ADC_TEMP_INT);
+    return 49000;
 }
 int3float slc_TempBattValue()
         {

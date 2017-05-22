@@ -36,7 +36,7 @@ extern "C" {
 
     typedef uint32_t int3float;
     void slc_clamp(uint16_t *n, int lower, int upper );
-
+    void Delay_ms(unsigned int dms);
 
     /* Provide C++ Compatibility */
 #ifdef __cplusplus

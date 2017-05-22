@@ -4,14 +4,27 @@
 uint16_t f_freq;
 static int3float f_max_voltage;
 static int3float f_max_current;
-
+static bool f_disabled;
 void slc_TimerInit(uint16_t freq);
 
 void slc_InitOscilators(uint16_t freq)
 {
     slc_TimerInit(freq);
+    f_disabled = false;
 }
 
+void slc_DisableOscilators(void)
+{
+    f_disabled = true;
+    slc_SetFanPWM(0);
+    slc_SetBasePWM(0);
+}
+void slc_EnableOscilators(void)
+{
+    f_disabled = false;
+    onFanTick();
+    onBaseTick();
+}
 static void getConstants(int freq,int *prescaler, int *value)
 {
 	const int MAX_VALUE = 65535;
@@ -83,6 +96,8 @@ void slc_QueueFanRegulator(int3float initial_working_temp)
 static float k_fan = 0.01;
 void onFanTick(void)
 {
+    if(f_disabled)
+        return;
     uint8_t duty_cycle = 0;
     duty_cycle = k_fan*(slc_TempIntValue() - working_temp);
     slc_SetFanPWM(duty_cycle);
@@ -90,6 +105,8 @@ void onFanTick(void)
 
 void onBaseTick(void)
 {
+    if(f_disabled)
+        return;
     slc_SetBasePWM(60);
 }
 void __attribute__( (interrupt(IPL5AUTO), vector(_TIMER_2_VECTOR))) isr_pwm(void)

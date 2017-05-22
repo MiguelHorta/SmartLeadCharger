@@ -42,6 +42,8 @@
 extern "C" {
 #endif
     void slc_InitOscilators(uint16_t freq);
+    void slc_EnsableOscilators(void);
+    void slc_DisableOscilators(void);
     void slc_QueueBaseRegulator(int3float initial_max_voltage, int3float initial_max_current);
     void slc_QueueFanRegulator(int3float initial_working_temp);
      

@@ -9,6 +9,7 @@
       <itemPath>slc_control_loop.h</itemPath>
       <itemPath>slc_oscilators.h</itemPath>
       <itemPath>pic_hd44780.h</itemPath>
+      <itemPath>slc_lcd.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -25,6 +26,7 @@
       <itemPath>slc_control_loop.c</itemPath>
       <itemPath>slc_oscilators.c</itemPath>
       <itemPath>pic_hd44780.c</itemPath>
+      <itemPath>slc_lcd.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

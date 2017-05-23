@@ -23,7 +23,7 @@ void slc_InitControlLoop(uint16_t freq)
 	
 	T4CONbits.ON = 0; // Stop timer
 	IFS0bits.T4IF=0; // Reset interrupt flag 
-	T2CONbits.TCKPS = prescaler;
+	T5CONbits.TCKPS = prescaler;
 	PR4 = value;
 	TMR4 = 0;
 	T4CONbits.TON = 1;

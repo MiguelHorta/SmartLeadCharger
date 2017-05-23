@@ -6,7 +6,7 @@
 #include "slc_adc.h"
 #include "slc_oscilators.h"
 #include "slc_control_loop.h"
-#include "pic_hd44780.h"
+#include "slc_lcd.h"
 
 #define SYSCLK 80000000L // System clock frequency, in Hz
 #define PBUSCLK 40000000L // Peripheral bus clock
@@ -40,18 +40,8 @@ int main(int argc, char** argv)
     
     /* Control Loop */
     slc_InitControlLoop(1000);
-    TM_HD44780_Init(16, 2);
-    TM_HD44780_Puts(0, 0, "STM32F4/29 Discovery");    
-    Delay_us(3000000);    
-    TM_HD44780_CursorOn();
-    TM_HD44780_BlinkOn();
-    while(1)
-    {
-        int i;
-        for(i = 0;  i < 5; i++)
-        {
-        printf("R%d: %d\n", i, slc_ADCGetLatestValue(i));
-        }
-    }
+    slc_InitLCD();
+    
+    while(1);
     return (EXIT_SUCCESS);
 }

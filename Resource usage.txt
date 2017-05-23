@@ -13,3 +13,6 @@ AN3/RB3     - Temp int adc
 AN4/RB4     - Temp batt adc
 
 Timer 4 -> Interrupt para equação de controlo
+Timer 5 -> Interrupt para buttoes
+
+RE0-RE5 - LCD

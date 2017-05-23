@@ -6,6 +6,8 @@ static int3float f_max_voltage;
 static int3float f_max_current;
 static bool f_disabled;
 void slc_TimerInit(uint16_t freq);
+void slc_SetFanPWM(uint8_t dutyCycle);
+void slc_SetBasePWM(uint8_t dutyCycle);
 
 void slc_InitOscilators(uint16_t freq)
 {

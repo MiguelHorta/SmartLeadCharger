@@ -1,5 +1,5 @@
 #include "slc_oscilators.h"
-
+#include "slc_control_loop.h"
 static void getConstants(int freq,int *prescaler, int *value)
 {
 	const int MAX_VALUE = 65535;
@@ -36,6 +36,7 @@ void slc_InitControlLoop(uint16_t freq)
 
 void __attribute__( (interrupt(IPL5AUTO), vector(_TIMER_4_VECTOR))) isr_control_loop(void)
 {
+    OnCheckFaultyConditions();
     onBaseTick();
     onFanTick();
 	IFS0bits.T4IF = 0;

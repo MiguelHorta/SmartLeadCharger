@@ -56,6 +56,8 @@ extern "C" {
     //XXX It assumed to be linear
     void slc_SetCFVoltageVariation(int3float);
     
+    void slc_DisableOscilators(void);
+    void slc_EnableOscilators(void);
     //update
     void onFanTick(void);
     void onBaseTick(void);

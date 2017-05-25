@@ -1,5 +1,6 @@
 #include "slc_oscilators.h"
 #include "slc_adc.h"
+#include "slc_charge_plan.h"
 
 uint16_t f_freq;
 static int3float f_max_voltage;
@@ -109,7 +110,12 @@ void onBaseTick(void)
 {
     if(f_disabled)
         return;
-    slc_SetBasePWM(60);
+    static ControlType ct = VOLTAGE;
+    ct = getControlType();
+    if(ct == VOLTAGE)
+        slc_SetBasePWM(10);
+    else if(ct == CURRENT)
+        slc_SetBasePWM(40);
 }
 void __attribute__( (interrupt(IPL5AUTO), vector(_TIMER_2_VECTOR))) isr_pwm(void)
 {

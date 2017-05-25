@@ -35,7 +35,6 @@ static void TM_HD44780_InitPins(void);
 static void TM_HD44780_Cmd(uint8_t cmd);
 static void TM_HD44780_Cmd4bit(uint8_t cmd);
 static void TM_HD44780_Data(uint8_t data);
-static void TM_HD44780_CursorSet(uint8_t col, uint8_t row);
 
 /* Private variable */
 static HD44780_Options_t HD44780_Opts;
@@ -249,7 +248,7 @@ static void TM_HD44780_Cmd4bit(uint8_t cmd) {
 	HD44780_E_BLINK;
 }
 
-static void TM_HD44780_CursorSet(uint8_t col, uint8_t row) {
+void TM_HD44780_CursorSet(uint8_t col, uint8_t row) {
 	uint8_t row_offsets[] = {0x00, 0x40, 0x14, 0x54};
 	
 	/* Go to beginning */

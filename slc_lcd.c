@@ -3,7 +3,7 @@
 
 typedef enum LcdStates
 {
-    STATUS = 0x0,
+    DIAGNOSIS = 0x0,
     START_CHARGE = 0x1,
     START_DISCHARGE = 0x2,
     SENSORS = 0x3,
@@ -13,33 +13,46 @@ typedef enum LcdStates
     SENSORS_BATT = 0x7,
     SENSORS_TEMP_INT = 0x8,
     SENSORS_TEMP_EXT = 0x9,
+    DIAGNOSIS_DETAIL = 0xA,
+    START_CHARGE_INT = 0xB,
+    START_CHARGE_FST = 0xC,
+    START_CHARGE_SLW = 0xD,
+    START_CHARGE_CONFIRM = 0xE,
+    START_DISCHARGE_INPUT = 0xF,    
+    CUSTOM_OUTPUT_CHOOSER = 0x10,
+    CUSTOM_OUTPUT_INPUT = 0x11,            
 }LcdStates;
 
-static unsigned int current_lcd = STATUS;
+#define LCD_INPUT_LENGHT 5
+#define LCD_INPUT_FIRST 3
+static char lcd_input[LCD_INPUT_LENGHT+1] = {"00000"};
+static int8_t lcd_input_pivot = 0;
+static bool lcd_edit = false;
+static unsigned int current_lcd = DIAGNOSIS;
 void ChangeState(LcdStates state);
 /* START CHARGE STATE */
-void OnStatus(void)
+void OnDiagnosis(void)
 {
     TM_HD44780_Clear();
-    TM_HD44780_Puts(0, 0, "STATUS STATUS   STATUS STATUS   ");
+    TM_HD44780_Puts(0, 0, "Diagnosis       Get battery info");
 }
-void OnStatusTick(void)
+void OnDiagnosisTick(void)
 {
     0;
 }
-void StatusOk(void)
+void DiagnosisOk(void)
+{
+    ChangeState(DIAGNOSIS_DETAIL);
+}
+void DiagnosisCancel(void)
 {
     0;
 }
-void StatusCancel(void)
-{
-    0;
-}
-void StatusMinus(void)
+void DiagnosisMinus(void)
 {
     ChangeState(CUSTOM_OUTPUT);
 }
-void StatusPlus(void)
+void DiagnosisPlus(void)
 {
     ChangeState(START_CHARGE);
 }
@@ -48,7 +61,7 @@ void StatusPlus(void)
 void OnStartCharge(void)
 {
     TM_HD44780_Clear();
-    TM_HD44780_Puts(0, 0, "New charge plan Charge battery--");
+    TM_HD44780_Puts(0, 0, "Charge          Start new charge");
 }
 void OnStartChargeTick(void)
 {
@@ -64,7 +77,7 @@ void StartChargeCancel(void)
 }
 void StartChargeMinus(void)
 {
-    ChangeState(STATUS);
+    ChangeState(DIAGNOSIS);
 }
 void StartChargePlus(void)
 {
@@ -75,7 +88,7 @@ void StartChargePlus(void)
 void OnStartDischarge(void)
 {
     TM_HD44780_Clear();
-    TM_HD44780_Puts(0, 0, "Discharge plan  Discharge batter");
+    TM_HD44780_Puts(0, 0, "Discharge       Start discharge ");
 }
 void OnStartDischargeTick(void)
 {
@@ -83,7 +96,7 @@ void OnStartDischargeTick(void)
 }
 void StartDischargeOk(void)
 {
-    0;
+    ChangeState(START_DISCHARGE_INPUT);
 }
 void StartDischargeCancel(void)
 {
@@ -102,7 +115,7 @@ void StartDischargePlus(void)
 void OnSensors(void)
 {
     TM_HD44780_Clear();
-    TM_HD44780_Puts(0, 0, "Sensors         Sensors state");
+    TM_HD44780_Puts(0, 0, "Sensors         Get sensor state");
 }
 void OnSensorsTick(void)
 {
@@ -129,7 +142,7 @@ void SensorsPlus(void)
 void OnCustomOutput(void)
 {
     TM_HD44780_Clear();
-    TM_HD44780_Puts(0, 0, "Custom output   CUSTOM OUTPUT");
+    TM_HD44780_Puts(0, 0, "Custom output   Force output    ");
 }
 void OnCustomOutputTick(void)
 {
@@ -137,7 +150,7 @@ void OnCustomOutputTick(void)
 }
 void CustomOutputOk(void)
 {
-    0;
+    ChangeState(CUSTOM_OUTPUT_CHOOSER);
 }
 void CustomOutputCancel(void)
 {
@@ -149,7 +162,7 @@ void CustomOutputMinus(void)
 }
 void CustomOutputPlus(void)
 {
-    ChangeState(STATUS);
+    ChangeState(DIAGNOSIS);
 }
 /*  END** START DISCHARGE STATE */
 /* START CHARGE STATE */
@@ -297,19 +310,225 @@ void SensorsTEMPEXTPlus(void)
     ChangeState(SENSORS_IOUT);
 }
 /*  END** START CHARGE STATE */
+/* START CHARGE STATE */
+void OnDiagnosisDetail(void)
+{
+    static char str[33];
+    sprintf(str, "Battery         %02.1fV  -  %03.1f%%", slc_TempBattValue(), slc_TempBattValue()/12.8);
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, str);
+}
+void OnDiagnosisDetailTick(void)
+{
+    0;
+}
+void DiagnosisDetailOk(void)
+{
+    0;
+}
+void DiagnosisDetailCancel(void)
+{
+    ChangeState(DIAGNOSIS);
+}
+void DiagnosisDetailMinus(void)
+{
+    0;;
+}
+void DiagnosisDetailPlus(void)
+{
+    0;
+}
+/*  END** START CHARGE STATE */
+/* START CHARGE STATE */
+void OnStartChargeInt(void)
+{
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, "New charge plan Smart charge    ");
+}
+void OnStartChargeIntTick(void)
+{
+    0;
+}
+void StartChargeIntOk(void)
+{
+    0;
+}
+void StartChargeIntCancel(void)
+{
+    ChangeState(START_CHARGE);
+}
+void StartChargeIntMinus(void)
+{
+    ChangeState(START_CHARGE_SLW);
+}
+void StartChargeIntPlus(void)
+{
+    ChangeState(START_CHARGE_FST);
+}
+/*  END** START CHARGE STATE */
+/* START CHARGE STATE */
+void OnStartChargeFst(void)
+{
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, "New charge plan Fast charge     ");
+}
+void OnStartChargeFstTick(void)
+{
+    0;
+}
+void StartChargeFstOk(void)
+{
+    0;
+}
+void StartChargeFstCancel(void)
+{
+    ChangeState(START_CHARGE);
+}
+void StartChargeFstMinus(void)
+{
+    ChangeState(START_CHARGE_INT);
+}
+void StartChargeFstPlus(void)
+{
+    ChangeState(START_CHARGE_SLW);
+}
+/*  END** START CHARGE STATE */
+
+/* START CHARGE STATE */
+void OnStartChargeSlw(void)
+{
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, "New charge plan Slow charge     ");
+}
+void OnStartChargeSlwTick(void)
+{
+    0;
+}
+void StartChargeSlwOk(void)
+{
+    0;
+}
+void StartChargeSlwCancel(void)
+{
+    ChangeState(START_CHARGE);
+}
+void StartChargeSlwMinus(void)
+{
+    ChangeState(START_CHARGE_FST);
+}
+void StartChargeSlwPlus(void)
+{
+    ChangeState(START_CHARGE_INT);
+}
+/*  END** START CHARGE STATE */
+/* START CHARGE STATE */
+void OnStartChargeSlw(void)
+{
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, "New charge plan Slow charge     ");
+}
+void OnStartChargeSlwTick(void)
+{
+    0;
+}
+void StartChargeSlwOk(void)
+{
+    0;
+}
+void StartChargeSlwCancel(void)
+{
+    ChangeState(START_CHARGE);
+}
+void StartChargeSlwMinus(void)
+{
+    ChangeState(START_CHARGE_FST);
+}
+void StartChargeSlwPlus(void)
+{
+    ChangeState(START_CHARGE_INT);
+}
+/*  END** START CHARGE STATE */
+/* START CHARGE STATE */
+void OnChargeConfirm(void)
+{
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, "Confirm");
+}
+void OnChargeConfirmTick(void)
+{
+    0;
+}
+void ChargeConfirmOk(void)
+{
+    0;
+}
+void ChargeConfirmCancel(void)
+{
+    0;
+}
+void ChargeConfirmMinus(void)
+{
+    0;
+}
+void ChargeConfirmPlus(void)
+{
+    0;
+}
+/*  END** START CHARGE STATE */
+/* START CHARGE STATE */
+void OnCustomOutputChooser(void)
+{
+    TM_HD44780_Clear();
+    TM_HD44780_PutCustom(0, 0, 0x7E);
+    TM_HD44780_Puts(1, 0, "Current");
+    TM_HD44780_PutCustom(0, 1, ' ');
+    TM_HD44780_Puts(1, 1, "Voltage");
+    lcd_input_pivot = 0;
+    TM_HD44780_BlinkOn();
+    TM_HD44780_CursorSet(0,0);
+}
+void OnCustomOutputChooserTick(void)
+{
+    0;
+}
+void CustomOutputChooserOk(void)
+{
+    //GO
+    //lcd_input_pivot
+    0;
+}
+void CustomOutputChooserCancel(void)
+{
+    ChangeState(CUSTOM_OUTPUT);
+}
+void CustomOutputChooserMinus(void)
+{
+    TM_HD44780_PutCustom(0, lcd_input_pivot, ' ');
+    lcd_input_pivot = !lcd_input_pivot;
+    TM_HD44780_PutCustom(0, lcd_input_pivot, 0x7E);
+    TM_HD44780_CursorSet(0,lcd_input_pivot);
+}
+void CustomOutputChooserPlus(void)
+{
+    TM_HD44780_PutCustom(0, lcd_input_pivot, ' ');
+    lcd_input_pivot = !lcd_input_pivot;
+    TM_HD44780_PutCustom(0, lcd_input_pivot, 0x7E);
+    TM_HD44780_CursorSet(0,lcd_input_pivot);
+}
+/*  END** START CHARGE STATE */
 void DoNop(void)
 {
- 0;   
+ 0;
 }
 static LcdScreen lcd_screens[] =
 {
     {
-      *OnStatus,
-      *OnStatusTick,
-      *StatusMinus,
-      *StatusPlus,
-      *StatusCancel,
-      *StatusOk,
+      *OnDiagnosis,
+      *OnDiagnosisTick,
+      *DiagnosisMinus,
+      *DiagnosisPlus,
+      *DiagnosisCancel,
+      *DiagnosisOk,
     },
     {
       *OnStartCharge,
@@ -383,7 +602,54 @@ static LcdScreen lcd_screens[] =
       *SensorsTEMPEXTCancel,
       *SensorsTEMPEXTOk
     },
-    
+    {
+      *OnDiagnosisDetail,
+      *OnDiagnosisDetailTick,
+      *DiagnosisDetailMinus,
+      *DiagnosisDetailPlus,
+      *DiagnosisDetailCancel,
+      *DiagnosisDetailOk
+    },
+    {
+      *OnStartChargeInt,
+      *OnStartChargeIntTick,
+      *StartChargeIntMinus,
+      *StartChargeIntPlus,
+      *StartChargeIntCancel,
+      *StartChargeIntOk
+    },
+    {
+      *OnStartChargeFst,
+      *OnStartChargeFstTick,
+      *StartChargeFstMinus,
+      *StartChargeFstPlus,
+      *StartChargeFstCancel,
+      *StartChargeFstOk
+    },
+    {
+      *OnStartChargeSlw,
+      *OnStartChargeSlwTick,
+      *StartChargeSlwMinus,
+      *StartChargeSlwPlus,
+      *StartChargeSlwCancel,
+      *StartChargeSlwOk
+    },
+    {
+      *OnStartDischargeInput,
+      *OnStartDischargeInputTick,
+      *StartDischargeInputMinus,
+      *StartDischargeInputPlus,
+      *StartDischargeInputCancel,
+      *StartDischargeInputOk
+    },
+    {
+      *OnCustomOutputChooser,
+      *OnCustomOutputChooserTick,
+      *CustomOutputChooserMinus,
+      *CustomOutputChooserPlus,
+      *CustomOutputChooserCancel,
+      *CustomOutputChooserOk
+    },
 };
 void ChangeState(LcdStates state)
 {
@@ -411,6 +677,10 @@ void slc_InitLCD(void)
     PLUS_BTN_CFG = 1;
     OK_BTN_CFG = 1;
     CANCEL_BTN_CFG = 1;
+    MINUS_BTN = 0;
+    PLUS_BTN = 0;
+    OK_BTN = 0;
+    CANCEL_BTN = 0;
     int prescaler,value;
 	getConstants(6,&prescaler,&value);
 	
@@ -424,7 +694,7 @@ void slc_InitLCD(void)
 	IFS0bits.T5IF = 0;
 	IEC0bits.T5IE = 1;
 	IPC5bits.T5IP = 2;
-    ChangeState(STATUS);
+    ChangeState(DIAGNOSIS);
 }
 void __attribute__( (interrupt(IPL2AUTO), vector(_TIMER_5_VECTOR))) isr_buttons(void)
 {

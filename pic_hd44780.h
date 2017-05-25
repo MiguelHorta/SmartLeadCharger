@@ -159,7 +159,13 @@ void TM_HD44780_BlinkOn(void);
  * @retval None
  */
 void TM_HD44780_BlinkOff(void);
-
+/**
+ * @brief  Move cursor
+ * @param  col col
+ * * @param  row row
+ * @retval None
+ */
+void TM_HD44780_CursorSet(uint8_t col, uint8_t row);
 /**
  * @brief  Shows cursor
  * @param  None

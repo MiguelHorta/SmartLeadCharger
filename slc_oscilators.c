@@ -96,6 +96,21 @@ void slc_QueueFanRegulator(int3float initial_working_temp)
 	OC2CONbits.ON = 1;
 }
 
+uint8_t getFanPWM(void)
+{
+    return fan_duty_cycle;
+}
+uint8_t getBasePWM(void)
+{
+    return base_duty_cycle;
+}
+    
+void setFanPWM(uint8_t v){
+    slc_SetFanPWM(v);
+}
+void setBasePWM(uint8_t v){
+    slc_SetBasePWM(v);
+}
 static float k_fan = 0.01;
 void onFanTick(void)
 {

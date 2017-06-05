@@ -5,7 +5,11 @@ static int3float f_target_voltage;
 static unsigned int f_target_capacity;
 static uint8_t f_active_plan;
 static uint8_t f_charge_step;
-
+const char ChargeTypeDesc[][14] = {
+    "Smart charge ",
+    "Fast charge  ",
+    "Slow charge  "
+};
 void setType(ChargeType t)
 {
     f_active_plan = (uint8_t)t;
@@ -117,6 +121,10 @@ int3float getControlValue(void)
         stored_plans[f_active_plan][f_charge_step].target_voltage;
 }
 
+char* getChargeTypeDesc(ChargeType ct)
+{
+    return ChargeTypeDesc[ct];
+}
 void OnCheckFaultyConditions(void)
 {
     

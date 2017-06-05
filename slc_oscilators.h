@@ -56,6 +56,11 @@ extern "C" {
     //XXX It assumed to be linear
     void slc_SetCFVoltageVariation(int3float);
     
+    uint8_t getFanPWM(void);
+    uint8_t getBasePWM(void);
+    
+    void setFanPWM(uint8_t);
+    void setBasePWM(uint8_t);
     void slc_DisableOscilators(void);
     void slc_EnableOscilators(void);
     //update

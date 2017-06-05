@@ -70,6 +70,7 @@ extern "C" {
     ChargeStep* getActiveStep();
     ControlType getControlType(void);
     int3float getControlValue(void);
+    char * getChargeTypeDesc(ChargeType);
     
     void OnCheckFaultyConditions(void);
 #ifdef __cplusplus

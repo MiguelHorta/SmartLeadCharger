@@ -42,6 +42,8 @@ int main(int argc, char** argv)
     slc_InitControlLoop(1000);
     slc_InitLCD();
     
-    while(1);
+    while(1){
+    
+    };
     return (EXIT_SUCCESS);
 }

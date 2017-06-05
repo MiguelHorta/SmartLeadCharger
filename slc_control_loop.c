@@ -31,7 +31,7 @@ void slc_InitControlLoop(uint16_t freq)
 	IFS0bits.T4IF = 0;
 	IEC0bits.T4IE = 1;
 	IPC4bits.T4IP = 5;
-	
+    
 }
 
 void __attribute__( (interrupt(IPL5AUTO), vector(_TIMER_4_VECTOR))) isr_control_loop(void)

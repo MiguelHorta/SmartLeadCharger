@@ -121,16 +121,52 @@ void onFanTick(void)
     slc_SetFanPWM(duty_cycle);
 }
 
+static float Kp=10;     // TODO calibrar estes valore
+static float Ti=1;
+static float Td=0.1;
+
+static float u_p=0;
+static float u=0;
+static float u_i=0;
+static float u_d=0;
+static float u_i_a=0;
+static float e_a=0;
+static float e=0;
+static float h=0;   // tempo da chamada da interrupção  
+
 void onBaseTick(void)
 {
     if(f_disabled)
         return;
     static ControlType ct = VOLTAGE;
     ct = getControlType();
-    if(ct == VOLTAGE)
-        slc_SetBasePWM(10);
-    else if(ct == CURRENT)
-        slc_SetBasePWM(40);
+    if(ct == VOLTAGE){
+        e=12-slc_BattValue();
+        u_p=Kp*(e);
+        u_d=Kp*Td*(e-e_a)/h;
+        u_i=e*Ti*h/Kp+u_i_a;
+        if(u_i>10)  // TODO ajustar estes valores das limitações
+            u_i=10;     
+        if(u_i<-10)
+            u_i=-10;
+        u=u_p+u_d+u_i;
+        slc_SetBasePWM(u);
+        u_i_a=u_i;
+        e_a=e;
+    }else if(ct == CURRENT){
+        e=0.5-slc_CurrentValue();
+        u_p=Kp*(e);
+        u_d=Kp*Td*(e-e_a)/h;
+        u_i=e*Ti*h/Kp+u_i_a;
+        if(u_i>10)  // TODO ajustar estes valores das limitações
+            u_i=10;
+        if(u_i<-10)
+            u_i=-10;
+        u=u_p+u_d+u_i;
+        slc_SetBasePWM(u);
+        u_i_a=u_i;
+        e_a=e;
+    }
 }
 void __attribute__( (interrupt(IPL5AUTO), vector(_TIMER_2_VECTOR))) isr_pwm(void)
 {

@@ -144,7 +144,7 @@ void TM_HD44780_Clear(void);
  * @param  *str: pointer to string to display
  * @retval None
  */
-void TM_HD44780_Puts(uint8_t x, uint8_t y, char* str);
+void TM_HD44780_Puts(uint8_t x, uint8_t y, char const* str);
 
 /**
  * @brief  Enables cursor blink

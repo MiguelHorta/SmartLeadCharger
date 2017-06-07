@@ -121,7 +121,7 @@ int3float getControlValue(void)
         stored_plans[f_active_plan][f_charge_step].target_voltage;
 }
 
-char* getChargeTypeDesc(ChargeType ct)
+char const * getChargeTypeDesc(ChargeType ct)
 {
     return ChargeTypeDesc[ct];
 }

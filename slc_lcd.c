@@ -1,5 +1,6 @@
 #include "slc_lcd.h"
 #include "slc_adc.h"
+#include "slc_batteries.h"
 #include "slc_charge_plan.h"
 
 typedef enum LcdStates
@@ -180,7 +181,7 @@ void CustomOutputPlus(void) {
 
 void OnSensorsIOUTTick(void) {
     static char str[33];
-    sprintf(str, "IOUT            IOUT: %d", slc_CurrentValue());
+    sprintf(str, "IOUT            IOUT: %1.3fA", slc_CurrentValue());
     TM_HD44780_Clear();
     TM_HD44780_Puts(0, 0, str);
 }
@@ -209,7 +210,7 @@ void SensorsIOUTPlus(void) {
 
 void OnSensorsVOUTTick(void) {
     static char str[33];
-    sprintf(str, "VOUT            VOUT: %d", slc_VredValue());
+    sprintf(str, "VOUT            VOUT: %2.3fV", slc_VredValue());
     TM_HD44780_Clear();
     TM_HD44780_Puts(0, 0, str);
 }
@@ -238,7 +239,7 @@ void SensorsVOUTPlus(void) {
 
 void OnSensorsBATTTick(void) {
     static char str[33];
-    sprintf(str, "BATT            BATT: %d", slc_BattValue());
+    sprintf(str, "BATT            BATT: %2.3fV", slc_BattValue());
     TM_HD44780_Clear();
     TM_HD44780_Puts(0, 0, str);
 }
@@ -267,7 +268,7 @@ void SensorsBATTPlus(void) {
 
 void OnSensorsTEMPINTTick(void) {
     static char str[33];
-    sprintf(str, "TEMPINT         TEMP: %d", slc_TempIntValue());
+    sprintf(str, "TEMPINT         TEMP: %3.1f\xdf""C", slc_TempIntValue());
     TM_HD44780_Clear();
     TM_HD44780_Puts(0, 0, str);
 }
@@ -296,7 +297,7 @@ void SensorsTEMPINTPlus(void) {
 
 void OnSensorsTEMPEXTTick(void) {
     static char str[33];
-    sprintf(str, "TEMPEXT         TEMP: %d", slc_TempBattValue());
+    sprintf(str, "TEMPEXT         TEMP: %3.1f\xdf""C", slc_TempBattValue());
     TM_HD44780_Clear();
     TM_HD44780_Puts(0, 0, str);
 }
@@ -324,7 +325,7 @@ void SensorsTEMPEXTPlus(void) {
 
 void OnDiagnosisDetail(void) {
     static char str[33];
-    sprintf(str, "Battery         %02.1fV  -  %03.1f%%", slc_TempBattValue(), slc_TempBattValue() / 12.8);
+    sprintf(str, "Battery         %02.1fV  -  %3.1f%%", slc_BattValue(), getActualVoltagePercentage(slc_BattValue()));
     TM_HD44780_Clear();
     TM_HD44780_Puts(0, 0, str);
 }
@@ -334,7 +335,7 @@ void OnDiagnosisDetailTick(void) {
 }
 
 void DiagnosisDetailOk(void) {
-    0;
+    ChangeState(DIAGNOSIS);
 }
 
 void DiagnosisDetailCancel(void) {

@@ -1,6 +1,7 @@
 #include "slc_oscilators.h"
 #include "slc_adc.h"
 #include "slc_charge_plan.h"
+#include "slc_control_loop.h"
 
 uint16_t f_freq;
 static int3float f_max_voltage;
@@ -69,7 +70,7 @@ void slc_SetBasePWM(uint8_t dutyCycle)
 	base_duty_cycle = dutyCycle;
 	OC1RS = (PR2+1)*(dutyCycle)/100;
 }
-void slc_QueueBaseRegulator(int3float initial_max_voltage, int3float initial_max_current)
+void slc_QueueBaseRegulator()
 {
 	OC1CONbits.OCM = 6; // Output Compare Mode Select bits; 6 -> PWM mode on OCx; Fault pin disabled
 	OC1CONbits.OCTSEL = 0; // 0 -> T2 1-> T3 
@@ -86,8 +87,8 @@ void slc_SetFanPWM(uint8_t dutyCycle)
 	OC2RS = (PR2+1)*(dutyCycle)/100;
 }
 
-static int3float working_temp;
-void slc_QueueFanRegulator(int3float initial_working_temp)
+static float working_temp;
+void slc_QueueFanRegulator(float initial_working_temp)
 {
     working_temp = initial_working_temp;
     OC2CONbits.OCM = 6; // Output Compare Mode Select bits; 6 -> PWM mode on OCx; Fault pin disabled
@@ -111,13 +112,13 @@ void setFanPWM(uint8_t v){
 void setBasePWM(uint8_t v){
     slc_SetBasePWM(v);
 }
-static float k_fan = 0.01;
+static float k_fan = 2.0;
 void onFanTick(void)
 {
     if(f_disabled)
         return;
     uint8_t duty_cycle = 0;
-    duty_cycle = k_fan*(slc_TempIntValue() - working_temp);
+    duty_cycle = 80.0 + k_fan*(slc_TempIntValue() - working_temp);
     slc_SetFanPWM(duty_cycle);
 }
 
@@ -132,7 +133,7 @@ static float u_d=0;
 static float u_i_a=0;
 static float e_a=0;
 static float e=0;
-static float h=0;   // tempo da chamada da interrupção  
+static float h = 1.0/CONTROL_LOOP_FREQ;   // tempo da chamada da interrupção  
 
 void onBaseTick(void)
 {

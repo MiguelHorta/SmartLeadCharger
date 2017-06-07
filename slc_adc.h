@@ -61,11 +61,11 @@ extern "C" {
     void slc_ADCQueueInput(uint16_t channel);
 
     int3float slc_ADCGetLatestValue(uint16_t channel);
-    int3float slc_CurrentValue();
-    int3float slc_VredValue();
-    int3float slc_BattValue();
-    int3float slc_TempIntValue();
-    int3float slc_TempBattValue();
+    float slc_CurrentValue();
+    float slc_VredValue();
+    float slc_BattValue();
+    float slc_TempIntValue();
+    float slc_TempBattValue();
 
 #ifdef __cplusplus
 }

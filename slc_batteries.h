@@ -31,11 +31,18 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    enum
+    typedef enum
     {
-        5
+        BV_NONE,
+        BV_14V7,
     }BatteryVoltage;
+    typedef enum
+    {
+        BC_NONE,
+        BC_2200,
+    }BatteryCapacity;
     /* Provide C++ Compatibility */
+    float getActualVoltagePercentage(float v);
 #ifdef __cplusplus
 }
 #endif

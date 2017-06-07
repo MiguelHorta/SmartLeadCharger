@@ -39,11 +39,11 @@ int main(int argc, char** argv)
     slc_DisableOscilators();
     
     /* Control Loop */
-    slc_InitControlLoop(1000);
+    slc_InitControlLoop();
     slc_InitLCD();
     
     while(1){
-    
+        
     };
     return (EXIT_SUCCESS);
 }

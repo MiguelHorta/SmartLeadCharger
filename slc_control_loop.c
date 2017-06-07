@@ -15,11 +15,12 @@ static void getConstants(int freq,int *prescaler, int *value)
 }
 
 //TODO warn/fail if frequency not possible
-void slc_InitControlLoop(uint16_t freq)
+
+void slc_InitControlLoop()
 {
 	
 	int prescaler,value;
-	getConstants(freq,&prescaler,&value);
+	getConstants(CONTROL_LOOP_FREQ,&prescaler,&value);
 	
 	T4CONbits.ON = 0; // Stop timer
 	IFS0bits.T4IF=0; // Reset interrupt flag 

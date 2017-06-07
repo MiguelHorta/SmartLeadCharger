@@ -24,6 +24,8 @@
 #include <plib.h>
 #include "slc_util.h"
 
+#define CONTROL_LOOP_FREQ 1000
+
 /* ************************************************************************** */
 /* ************************************************************************** */
 /* Section: Included Files                                                    */
@@ -41,7 +43,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    void slc_InitControlLoop(uint16_t freq);
+    void slc_InitControlLoop();
 #ifdef __cplusplus
 }
 #endif

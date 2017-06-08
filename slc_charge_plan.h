@@ -32,6 +32,7 @@
 extern "C" {
 #endif
     typedef bool (*callback)(int3float,int3float,int3float);
+    typedef void (*update_values)(void);
     /* Provide C++ Compatibility */
     typedef struct
     {
@@ -60,12 +61,14 @@ extern "C" {
 
     void setType(ChargeType);
     void setBatteryVoltage(int3float);
+    void setBatteryCells(uint8_t);
     void setCapacity(unsigned int);
     void startCharge(void);
     void stopCharge(void);
     
     int3float getBatteryVoltage(void);
     unsigned int getCapacity(void);
+    uint8_t getBatteryCells(void);
     ChargeType getType(void);
     ChargeStep* getActiveStep();
     ControlType getControlType(void);

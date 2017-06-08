@@ -3,6 +3,7 @@
 #include "slc_lcd.h"
 
 static int3float f_target_voltage = 14700;
+static int3float f_target_cells = 6;
 static unsigned int f_target_capacity = 2200;
 static uint8_t f_active_plan = CHARGE_TYPE_FIRST;
  uint8_t f_charge_step = 0;
@@ -37,15 +38,6 @@ void setCapacity(unsigned int c)
 {
     f_target_capacity  = c;
 }
-void startCharge(void)
-{
-    slc_EnableOscilators();
-    start_time = getCurrentTick();
-    is_finished = false;
-    has_errors = false;
-    f_charge_step = 0;
-    changed_step = true;
-}
 void stopCharge(void)
 {
     slc_DisableOscilators();
@@ -58,13 +50,13 @@ bool SmartChargeStep1(int3float iout,int3float vout,int3float text)
 }
 bool SmartChargeStep2(int3float iout,int3float vout,int3float text)
 {
-    if(iout < 250)
+    if(iout < 0.05*f_target_capacity)
         return true;
     return false;
 }
 bool SmartChargeStep3(int3float iout,int3float vout,int3float text)
 {
-    if(iout > 500)
+    if(iout < 50)
         return true;
     return false;
     
@@ -72,20 +64,20 @@ bool SmartChargeStep3(int3float iout,int3float vout,int3float text)
 ChargeStep smart_charge[SMART_CHARGE_STEPS] = {
     {
         "0.2A to battery.",
-        400,
+        100,
         0,
         &SmartChargeStep1,
     },
     {
         "14.7V to battery",
         0,
-        14700,
+        6000,
         &SmartChargeStep2,
     },
     {
         "12V to battery.",
         0,
-        12000,
+        6000,
         &SmartChargeStep3,
     }
 };
@@ -117,7 +109,25 @@ ChargeStep slow_charge[SLOW_CHARGE_STEPS] = {
 };
 
 ChargeStep* stored_plans[PLAN_COUNT] = {smart_charge, fast_charge, slow_charge}; 
-
+void SmartChargeUpdate(void)
+{
+    stored_plans[f_active_plan][0].target_current = f_target_capacity*0.25;
+    stored_plans[f_active_plan][1].target_voltage = f_target_cells*2.45;
+    stored_plans[f_active_plan][2].target_voltage = f_target_cells*2.35;
+}
+void FastChargeUpdate(void)
+{
+    stored_plans[f_active_plan][0].target_current = f_target_capacity*0.25;
+}
+void SlowChargeUpdate(void)
+{
+    stored_plans[f_active_plan][0].target_current = f_target_capacity*0.1;
+}
+update_values plans_update[PLAN_COUNT] = {
+    &SmartChargeUpdate,
+    &FastChargeUpdate,
+    &SlowChargeUpdate,
+};
 int3float getBatteryVoltage(void)
 {
     return f_target_voltage;
@@ -193,4 +203,23 @@ void OnControlTick(void)
 bool changedStep()
 {
     return changed_step;
+}
+void setBatteryCells(uint8_t v)
+{
+    f_target_cells = v;
+    f_target_voltage = 2.45*v;
+}
+uint8_t getBatteryCells(void)
+{
+    return f_target_cells ;
+}
+void startCharge(void)
+{
+    slc_EnableOscilators();
+    start_time = getCurrentTick();
+    is_finished = false;
+    has_errors = false;
+    f_charge_step = 0;
+    changed_step = true;
+    (*plans_update[f_active_plan])();
 }

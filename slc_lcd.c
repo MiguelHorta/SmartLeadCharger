@@ -17,18 +17,20 @@ typedef enum LcdStates
     SENSORS_BATT = 0x7,
     SENSORS_TEMP_INT = 0x8,
     SENSORS_TEMP_EXT = 0x9,
-    DIAGNOSIS_DETAIL = 0xA,
+    DIAGNOSIS_DETAIL = 0xA, //xxx
     START_CHARGE_CHOOSE_TYPE = 0xB,
     START_CHARGE_CONFIRM = 0xC,
     START_DISCHARGE_INPUT = 0xD,    
     CUSTOM_OUTPUT_CHOOSER = 0xE,
-    CUSTOM_OUTPUT_INPUT = 0xF,
-    CUSTOM_OUTPUT_INPUT_PWM = 0x10,
-    CHARGING_STATE_0 = 0x11,
-    CHARGING_STATE_1 = 0x12,
+    CUSTOM_OUTPUT_INPUT = 0xF, //xxx
+    CUSTOM_OUTPUT_INPUT_PWM = 0x10,//xxx
+    CHARGING_STATE_0 = 0x11,//xxx
+    CHARGING_STATE_1 = 0x12,//xxx
     CONFIRM_CANCEL_CHARGE = 0x13,
-    POST_CHARGE_STATS = 0x14,
-    ERROR_OCCURRED = 0x15,
+    POST_CHARGE_STATS = 0x14, //xxx
+    ERROR_OCCURRED = 0x15,//xxx
+    START_CHARGE_CELLS = 0x16, //xxx
+    START_CHARGE_CAPACITY = 0x17,//xxx Nao da para baterias de > 10_000
 }LcdStates;
 
 #define LCD_INPUT_LENGHT 5
@@ -372,7 +374,7 @@ void OnStartChargeChooseTypeTick(void) {
 
 void StartChargeChooseTypeOk(void) {
     setType(lcd_input_pivot);
-    ChangeState(START_CHARGE_CONFIRM);
+    ChangeState(START_CHARGE_CELLS);
 }
 
 void StartChargeChooseTypeCancel(void) {
@@ -431,6 +433,7 @@ void OnStartDischargeInput(void) {
     //lcd_input = {'0', '0', '2', '0', '0'};
     TM_HD44780_PutCustom(LCD_INPUT_FIRST + LCD_INPUT_LENGHT, 1, 0x7E);
     TM_HD44780_CursorOn();
+    TM_HD44780_BlinkOff();
     TM_HD44780_CursorSet(LCD_INPUT_FIRST, 1);
 }
 
@@ -544,6 +547,7 @@ void OnCustomOutputChooserInputPWM(void) {
     //lcd_input = {'0', '0', '2', '0', '0'};
     TM_HD44780_PutCustom(LCD_INPUT_FIRST + LCD_INPUT_LENGHT, 1, 0x7E);
     TM_HD44780_CursorOn();
+    TM_HD44780_BlinkOff();
     TM_HD44780_CursorSet(LCD_INPUT_FIRST, 1);
 }
 
@@ -743,6 +747,148 @@ void ErrorOccurredPlus(void) {
     0;
 }
 // </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="StartChargeCells callbaks">
+
+void OnStartChargeCells(void) {
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, "Cell Number:    C: 00000");
+    lcd_input_pivot = 0;
+    lcd_edit = false;
+    //lcd_input = {'0', '0', '2', '0', '0'};
+    TM_HD44780_PutCustom(LCD_INPUT_FIRST + LCD_INPUT_LENGHT, 1, 0x7E);
+    TM_HD44780_CursorOn();
+    TM_HD44780_BlinkOff();
+    TM_HD44780_CursorSet(LCD_INPUT_FIRST, 1);
+}
+
+void OnStartChargeCellsTick(void) {
+    0;
+}
+
+void StartChargeCellsOk(void) {
+    if (lcd_input_pivot == LCD_INPUT_LENGHT) {
+        // done
+        TM_HD44780_CursorOff();
+        setBatteryCells(atoi(lcd_input));
+        ChangeState(START_CHARGE_CAPACITY);
+    } else if (lcd_edit) {
+        TM_HD44780_CursorSet(LCD_INPUT_FIRST + ++lcd_input_pivot, 1);
+        if (lcd_input_pivot == LCD_INPUT_LENGHT)
+            lcd_edit = false;
+    } else if (!lcd_edit) {
+        TM_HD44780_CursorSet(LCD_INPUT_FIRST + lcd_input_pivot, 1);
+        TM_HD44780_BlinkOn();
+        lcd_edit = true;
+    }
+}
+
+void StartChargeCellsCancel(void) {
+    if (lcd_edit) {
+        TM_HD44780_BlinkOff();
+        lcd_edit = false;
+    } else if (!lcd_edit) {
+        TM_HD44780_CursorOff();
+        ChangeState(START_CHARGE_CHOOSE_TYPE);
+    }
+}
+
+void StartChargeCellsMinus(void) {
+    if (lcd_edit) {
+        if (--lcd_input[lcd_input_pivot] < 0x30)
+            lcd_input[lcd_input_pivot] = 0x39;
+        TM_HD44780_PutCustom(LCD_INPUT_FIRST + lcd_input_pivot, 1, lcd_input[lcd_input_pivot]);
+    } else {
+        if (--lcd_input_pivot < 0) {
+            lcd_input_pivot = LCD_INPUT_LENGHT;
+        }
+    }
+    TM_HD44780_CursorSet(LCD_INPUT_FIRST + lcd_input_pivot, 1);
+}
+
+void StartChargeCellsPlus(void) {
+    if (lcd_edit) {
+        if (++lcd_input[lcd_input_pivot] > 0x39)
+            lcd_input[lcd_input_pivot] = 0x30;
+        TM_HD44780_PutCustom(LCD_INPUT_FIRST + lcd_input_pivot, 1, lcd_input[lcd_input_pivot]);
+    } else {
+        if (++lcd_input_pivot > LCD_INPUT_LENGHT) {
+            lcd_input_pivot = 0;
+        }
+    }
+    TM_HD44780_CursorSet(LCD_INPUT_FIRST + lcd_input_pivot, 1);
+}
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="StartChargeCapacity callbaks">
+
+void OnStartChargeCapacity(void) {
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, "Batt capacity:  C: 00000");
+    lcd_input_pivot = 0;
+    lcd_edit = false;
+    //lcd_input = {'0', '0', '2', '0', '0'};
+    TM_HD44780_PutCustom(LCD_INPUT_FIRST + LCD_INPUT_LENGHT, 1, 0x7E);
+    TM_HD44780_CursorOn();    
+    TM_HD44780_BlinkOff();
+    TM_HD44780_CursorSet(LCD_INPUT_FIRST, 1);
+}
+
+void OnStartChargeCapacityTick(void) {
+    0;
+}
+
+void StartChargeCapacityOk(void) {
+    if (lcd_input_pivot == LCD_INPUT_LENGHT) {
+        // done
+        TM_HD44780_CursorOff();
+        setCapacity(atoi(lcd_input));
+        ChangeState(START_CHARGE_CONFIRM);
+    } else if (lcd_edit) {
+        TM_HD44780_CursorSet(LCD_INPUT_FIRST + ++lcd_input_pivot, 1);
+        if (lcd_input_pivot == LCD_INPUT_LENGHT)
+            lcd_edit = false;
+    } else if (!lcd_edit) {
+        TM_HD44780_CursorSet(LCD_INPUT_FIRST + lcd_input_pivot, 1);
+        TM_HD44780_BlinkOn();
+        lcd_edit = true;
+    }
+}
+
+void StartChargeCapacityCancel(void) {
+    if (lcd_edit) {
+        TM_HD44780_BlinkOff();
+        lcd_edit = false;
+    } else if (!lcd_edit) {
+        TM_HD44780_CursorOff();
+        ChangeState(START_CHARGE_CELLS);
+    }
+}
+
+void StartChargeCapacityMinus(void) {
+    if (lcd_edit) {
+        if (--lcd_input[lcd_input_pivot] < 0x30)
+            lcd_input[lcd_input_pivot] = 0x39;
+        TM_HD44780_PutCustom(LCD_INPUT_FIRST + lcd_input_pivot, 1, lcd_input[lcd_input_pivot]);
+    } else {
+        if (--lcd_input_pivot < 0) {
+            lcd_input_pivot = LCD_INPUT_LENGHT;
+        }
+    }
+    TM_HD44780_CursorSet(LCD_INPUT_FIRST + lcd_input_pivot, 1);
+}
+
+void StartChargeCapacityPlus(void) {
+    if (lcd_edit) {
+        if (++lcd_input[lcd_input_pivot] > 0x39)
+            lcd_input[lcd_input_pivot] = 0x30;
+        TM_HD44780_PutCustom(LCD_INPUT_FIRST + lcd_input_pivot, 1, lcd_input[lcd_input_pivot]);
+    } else {
+        if (++lcd_input_pivot > LCD_INPUT_LENGHT) {
+            lcd_input_pivot = 0;
+        }
+    }
+    TM_HD44780_CursorSet(LCD_INPUT_FIRST + lcd_input_pivot, 1);
+}
+// </editor-fold>
 void DoNop(void)
 {
  0;
@@ -925,6 +1071,23 @@ static LcdScreen lcd_screens[] =
       &ErrorOccurredCancel,
       &ErrorOccurredOk,
     },
+    {
+      &OnStartChargeCells,
+      &OnStartChargeCellsTick,
+      &StartChargeCellsMinus,
+      &StartChargeCellsPlus,
+      &StartChargeCellsCancel,
+      &StartChargeCellsOk,
+    },
+    {
+      &OnStartChargeCapacity,
+      &OnStartChargeCapacityTick,
+      &StartChargeCapacityMinus,
+      &StartChargeCapacityPlus,
+      &StartChargeCapacityCancel,
+      &StartChargeCapacityOk,
+    },
+    
 };
 void ChangeState(LcdStates state)
 {

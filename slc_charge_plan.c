@@ -1,15 +1,30 @@
 #include "slc_charge_plan.h"
 #include "slc_oscilators.h"
+#include "slc_lcd.h"
 
-static int3float f_target_voltage;
-static unsigned int f_target_capacity;
-static uint8_t f_active_plan;
-static uint8_t f_charge_step;
+static int3float f_target_voltage = 14700;
+static unsigned int f_target_capacity = 2200;
+static uint8_t f_active_plan = CHARGE_TYPE_FIRST;
+ uint8_t f_charge_step = 0;
+static uint32_t start_time = 0;
+static uint32_t duration = 0;
+static bool is_finished = true;
+static bool has_errors = false;
+static bool changed_step = true;
+
 const char ChargeTypeDesc[][14] = {
     "Smart charge ",
     "Fast charge  ",
     "Slow charge  "
 };
+
+const uint8_t ChargeTypeSteps[PLAN_COUNT] =
+{
+    SMART_CHARGE_STEPS,
+    FAST_CHARGE_STEPS,
+    SLOW_CHARGE_STEPS
+};
+
 void setType(ChargeType t)
 {
     f_active_plan = (uint8_t)t;
@@ -24,48 +39,54 @@ void setCapacity(unsigned int c)
 }
 void startCharge(void)
 {
-    //XXX REMOVE AFTER IMPLEMENTED
-    f_target_voltage = 14.7;
-    f_target_capacity = 2200;
-    //XXX
     slc_EnableOscilators();
+    start_time = getCurrentTick();
+    is_finished = false;
+    has_errors = false;
+    f_charge_step = 0;
+    changed_step = true;
 }
 void stopCharge(void)
 {
-    //XXX REMOVE AFTER IMPLEMENTED
-    f_target_voltage = 14.7;
-    f_target_capacity = 2200;
-    //XXX
     slc_DisableOscilators();
 }
-bool SmartChargeStep1(int3float iout,int3float vout,int3float text){
+bool SmartChargeStep1(int3float iout,int3float vout,int3float text)
+{
+    if(vout > f_target_voltage)
+        return true;
+    return false;
+}
+bool SmartChargeStep2(int3float iout,int3float vout,int3float text)
+{
+    if(iout < 250)
+        return true;
+    return false;
+}
+bool SmartChargeStep3(int3float iout,int3float vout,int3float text)
+{
+    if(iout > 500)
+        return true;
+    return false;
     
 }
-bool SmartChargeStep2(int3float iout,int3float vout,int3float text){
-    
-}
-bool SmartChargeStep3(int3float iout,int3float vout,int3float text){
-    
-}
-
 ChargeStep smart_charge[SMART_CHARGE_STEPS] = {
     {
-        "Feeding 0.2A to battery.",
-        200,
+        "0.2A to battery.",
+        400,
         0,
-        *SmartChargeStep1,
+        &SmartChargeStep1,
     },
     {
-        "Feeding 14.7V to battery.",
+        "14.7V to battery",
         0,
         14700,
-        *SmartChargeStep2,
+        &SmartChargeStep2,
     },
     {
-        "Feeding 12V to battery.",
+        "12V to battery.",
         0,
         12000,
-        *SmartChargeStep3,
+        &SmartChargeStep3,
     }
 };
 
@@ -75,7 +96,7 @@ bool FastChargeStep1(int3float iout,int3float vout,int3float text){
 
 ChargeStep fast_charge[FAST_CHARGE_STEPS] = {
         {
-        "Feeding 0.5A to battery.",
+        "0.5A to battery.",
         0500,
         0,
         *FastChargeStep1,
@@ -88,7 +109,7 @@ bool SlowChargeStep1(int3float iout,int3float vout,int3float text){
 
 ChargeStep slow_charge[SLOW_CHARGE_STEPS] = {
         {
-        "Feeding 0.1A to battery.",
+        "0.1A to battery.",
         0100,
         0,
         *SlowChargeStep1,
@@ -116,6 +137,8 @@ ControlType getControlType(void)
 
 int3float getControlValue(void)
 {
+    if(is_finished)
+        return 0;
     return stored_plans[f_active_plan][f_charge_step].target_current > 0 ? 
         stored_plans[f_active_plan][f_charge_step].target_current : 
         stored_plans[f_active_plan][f_charge_step].target_voltage;
@@ -125,10 +148,49 @@ char const * getChargeTypeDesc(ChargeType ct)
 {
     return ChargeTypeDesc[ct];
 }
-void OnCheckFaultyConditions(void)
+bool OnCheckFaultyConditions(void)
 {
-    
+    /*if(slc_Vred() < 1000 && slc_Current() < 100)
+    {
+        return true;
+    }*/
+    return false;
 }
 ChargeType getType(void){
     return f_active_plan;
+}
+
+bool isFinished(void)
+{
+    return is_finished;
+}
+
+bool hasErrors()
+{
+    return has_errors;
+}
+void OnControlTick(void)
+{
+    if((stored_plans[f_active_plan][f_charge_step].next_step)(slc_Current(), slc_Vred(), slc_TempBatt()))
+    {
+        f_charge_step++;
+        changed_step = true;
+        if( f_charge_step >= ChargeTypeSteps[f_active_plan])
+        {
+            is_finished = true;
+            duration = getCurrentTick() - start_time;
+            stopCharge();
+        }
+    }
+    if(OnCheckFaultyConditions())
+    {
+        has_errors = true;
+        stopCharge();
+    }
+    changed_step = false;
+}
+
+bool changedStep()
+{
+    return changed_step;
 }

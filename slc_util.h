@@ -34,7 +34,9 @@ extern "C" {
     #define SYSCLK 80000000L // System clock frequency, in Hz
     #define PBUSCLK 40000000L // Peripheral bus clock
 
-    typedef uint32_t int3float;
+    typedef long int int3float;
+    #define i3fM(a,b) ((a)*(b)/(1000))
+    #define i3fD(a,b) ((a*(1000))/(b))
     void slc_clamp(uint16_t *n, int lower, int upper );
     void Delay_ms(unsigned int dms);
 

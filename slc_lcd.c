@@ -26,6 +26,9 @@ typedef enum LcdStates
     CUSTOM_OUTPUT_INPUT_PWM = 0x10,
     CHARGING_STATE_0 = 0x11,
     CHARGING_STATE_1 = 0x12,
+    CONFIRM_CANCEL_CHARGE = 0x13,
+    POST_CHARGE_STATS = 0x14,
+    ERROR_OCCURRED = 0x15,
 }LcdStates;
 
 #define LCD_INPUT_LENGHT 5
@@ -392,7 +395,7 @@ void StartChargeChooseTypePlus(void) {
 
 void OnStartChargeConfirm(void) {
     static char str[33];
-    sprintf(str, "%-16s%02.1fV  -  %05.0fC", getChargeTypeDesc(getType()), getBatteryVoltage(), getCapacity());
+    sprintf(str, "%-16s%02.1fV - %06uC", getChargeTypeDesc(getType()), getBatteryVoltage()/1000.0, getCapacity());
     TM_HD44780_Clear();
     TM_HD44780_Puts(0, 0, str);
 }
@@ -605,12 +608,14 @@ void CustomOutputChooserInputPWMPlus(void) {
 
 void OnChargingState0(void) {
     TM_HD44780_Clear();
-    TM_HD44780_Puts(0, 0, "Charging");
+    TM_HD44780_Puts(0, 0, "Charging 0");
 }
 
 void OnChargingState0Tick(void) {
-    TM_HD44780_Puts(0, 1, "QQ");
-    ;
+    if(hasErrors())
+        ChangeState(ERROR_OCCURRED);
+    if(isFinished())
+        ChangeState(POST_CHARGE_STATS);
 }
 
 void ChargingState0Ok(void) {
@@ -618,8 +623,7 @@ void ChargingState0Ok(void) {
 }
 
 void ChargingState0Cancel(void) {
-    ChangeState(START_CHARGE);
-    stopCharge();
+    ChangeState(CONFIRM_CANCEL_CHARGE);
 }
 
 void ChargingState0Minus(void) {
@@ -627,6 +631,115 @@ void ChargingState0Minus(void) {
 }
 
 void ChargingState0Plus(void) {
+    0;
+}
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="ChargingState1 callbacks">
+
+void OnChargingState1(void) {
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, "Charging 1");
+}
+
+void OnChargingState1Tick(void) {
+    if(hasErrors())
+        ChangeState(ERROR_OCCURRED);
+    if(isFinished())
+        ChangeState(POST_CHARGE_STATS);
+}
+
+void ChargingState1Ok(void) {
+    ChangeState(CHARGING_STATE_0);;
+}
+
+void ChargingState1Cancel(void) {
+    ChangeState(CONFIRM_CANCEL_CHARGE);
+}
+
+void ChargingState1Minus(void) {
+    ChangeState(CHARGING_STATE_0);
+}
+
+void ChargingState1Plus(void) {
+    ChangeState(CHARGING_STATE_0);
+}
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="ConfirmCancelCharge callbacks">
+
+void OnConfirmCancelCharge(void) {
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, "Are you sure you want to cancel?");
+}
+
+void OnConfirmCancelChargeTick(void) {
+}
+
+void ConfirmCancelChargeOk(void) {
+    stopCharge();
+    ChangeState(POST_CHARGE_STATS);
+}
+
+void ConfirmCancelChargeCancel(void) {
+    ChangeState(CHARGING_STATE_0);
+}
+
+void ConfirmCancelChargeMinus(void) {
+    0;
+}
+
+void ConfirmCancelChargePlus(void) {
+    0;
+}
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="PostChargeStatus callbacks">
+
+void OnPostChargeStatus(void) {
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, "FIM Status here");
+}
+
+void OnPostChargeStatusTick(void) {
+}
+
+void PostChargeStatusOk(void) {
+    ChangeState(FIRST_LCD);
+}
+
+void PostChargeStatusCancel(void) {
+    ChangeState(FIRST_LCD);
+}
+
+void PostChargeStatusMinus(void) {
+    0;
+}
+
+void PostChargeStatusPlus(void) {
+    0;
+}
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="ChargingState1 callbacks">
+
+void OnErrorOccurred(void) {
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, "ERROR OCCURRED!!");
+}
+
+void OnErrorOccurredTick(void) {
+}
+
+void ErrorOccurredOk(void) {
+    ChangeState(FIRST_LCD);
+}
+
+void ErrorOccurredCancel(void) {
+    ChangeState(FIRST_LCD);
+}
+
+void ErrorOccurredMinus(void) {
+    0;
+}
+
+void ErrorOccurredPlus(void) {
     0;
 }
 // </editor-fold>
@@ -775,10 +888,42 @@ static LcdScreen lcd_screens[] =
     {
       &OnChargingState0,
       &OnChargingState0Tick,
-      &ChargingState0Ok,
-      &ChargingState0Cancel,
       &ChargingState0Minus,
       &ChargingState0Plus,
+      &ChargingState0Cancel,
+      &ChargingState0Ok,
+    },
+    {
+      &OnChargingState1,
+      &OnChargingState1Tick,
+      &ChargingState1Minus,
+      &ChargingState1Plus,
+      &ChargingState1Cancel,
+      &ChargingState1Ok,
+    },
+    {
+      &OnConfirmCancelCharge,
+      &OnConfirmCancelChargeTick,
+      &ConfirmCancelChargeMinus,
+      &ConfirmCancelChargePlus,
+      &ConfirmCancelChargeCancel,
+      &ConfirmCancelChargeOk,
+    },
+    {
+      &OnPostChargeStatus,
+      &OnPostChargeStatusTick,
+      &PostChargeStatusMinus,
+      &PostChargeStatusPlus,
+      &PostChargeStatusCancel,
+      &PostChargeStatusOk,
+    },
+    {
+      &OnErrorOccurred,
+      &OnErrorOccurredTick,
+      &ErrorOccurredMinus,
+      &ErrorOccurredPlus,
+      &ErrorOccurredCancel,
+      &ErrorOccurredOk,
     },
 };
 void ChangeState(LcdStates state)
@@ -826,10 +971,9 @@ void slc_InitLCD(void)
 	IPC5bits.T5IP = 2;
     ChangeState(FIRST_LCD);
 }
+static uint32_t tick_counting = 0;
 void __attribute__( (interrupt(IPL2AUTO), vector(_TIMER_5_VECTOR))) isr_buttons(void)
 {
-    static unsigned int refresh = 0;
-    
     if(CANCEL_BTN)
         (*lcd_screens[current_lcd].cancel)();
     else if(OK_BTN)
@@ -839,6 +983,12 @@ void __attribute__( (interrupt(IPL2AUTO), vector(_TIMER_5_VECTOR))) isr_buttons(
     else if(PLUS_BTN)
         (*lcd_screens[current_lcd].plus)();
     
-    (*lcd_screens[current_lcd].on_tick)();  
+    (*lcd_screens[current_lcd].on_tick)(); 
+    tick_counting++;
 	IFS0bits.T5IF = 0;
+}
+
+uint32_t getCurrentTick(void)
+{
+    return tick_counting;
 }

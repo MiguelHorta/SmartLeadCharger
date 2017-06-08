@@ -44,7 +44,7 @@ extern "C" {
     void slc_InitOscilators(uint16_t freq);
     void slc_EnsableOscilators(void);
     void slc_DisableOscilators(void);
-    void slc_QueueBaseRegulator();
+    void slc_QueueBaseRegulator(void);
     void slc_QueueFanRegulator(float initial_working_temp);
      
     void slc_SetMaxVoltage(int3float voltage); // the last 3 cases are decimal, 4 case is the unity

@@ -97,7 +97,7 @@ void __attribute__( (interrupt(IPL5AUTO), vector(_ADC_VECTOR))) isr_adc(void)
     int i;
     for(p_buff = (uint16_t*)(&ADC1BUF0), i = 0; p_buff <= (uint16_t*)(&ADC1BUFF) && i < ANALOG_INPUTS; p_buff += 8, i++)
     {
-        _adc_aquisitions[i].value = (*p_buff*3300)/1023; //((*p_buff*3300)/1023 + _adc_aquisitions[i].value)/2;
+        _adc_aquisitions[i].value = ((*p_buff*3300)/1023 + _adc_aquisitions[i].value)/2;
     }
     AD1CON1bits.ASAM = 1;
 	IFS1bits.AD1IF = 0;
@@ -105,35 +105,65 @@ void __attribute__( (interrupt(IPL5AUTO), vector(_ADC_VECTOR))) isr_adc(void)
 
 float slc_CurrentValue()
 {
-    float b_correction = 0;
-    float x_correction = 1;
-    return ((slc_ADCGetLatestValue(ADC_CURRENT)/1000)+b_correction)*x_correction;
+    float b_correction = 0.06;
+    float x_correction = 0.366;
+    return ((slc_ADCGetLatestValue(ADC_CURRENT)/1000.0)+b_correction)*x_correction;
 }
 float slc_VredValue()
 {
-    float b_correction = 0;
-    float x_correction = 1;
-    return ((slc_ADCGetLatestValue(ADC_VRED)/1000)+b_correction)*x_correction;
+    float b_correction = 0.034;
+    float x_correction = 4.61;
+    return ((slc_ADCGetLatestValue(ADC_VRED)/1000.0)+b_correction)*x_correction;
 }
 float slc_BattValue()
 {
-    float b_correction = 0;
-    float x_correction = 1;
-    return ((slc_ADCGetLatestValue(ADC_BATT)/1000)+b_correction)*x_correction;
+    float b_correction = 0.034;
+    float x_correction = 4.61;
+    return ((slc_ADCGetLatestValue(ADC_BATT)/1000.0)+b_correction)*x_correction;
 }
 float slc_TempIntValue()
 {
     float b_correction = 0;
-    float x_correction = 1;
-    return ((slc_ADCGetLatestValue(ADC_TEMP_INT)/3300)+b_correction)*x_correction;
+    float x_correction = 17.604;
+    return ((slc_ADCGetLatestValue(ADC_TEMP_INT)/1000.0)+b_correction)*x_correction;
 }
 float slc_TempBattValue()
 {
     float b_correction = 0;
-    float x_correction = 1;
-    return ((slc_ADCGetLatestValue(ADC_TEMP_BATT)/3300)+b_correction)*x_correction;
+    float x_correction = 17.604;
+    return ((slc_ADCGetLatestValue(ADC_TEMP_BATT)/1000.0)+b_correction)*x_correction;
 }
 
+int3float slc_Current()
+{
+    int3float b_correction = 60;
+    int3float x_correction = 366;
+    return i3fM((slc_ADCGetLatestValue(ADC_CURRENT)+b_correction) , x_correction);
+}
+int3float slc_Vred()
+{
+    int3float b_correction = 34;
+    int3float x_correction = 4610;
+    return i3fM((slc_ADCGetLatestValue(ADC_VRED)+b_correction), x_correction);
+}
+int3float slc_Batt()
+{
+    int3float b_correction = 34;
+    int3float x_correction = 4610;
+    return i3fM((slc_ADCGetLatestValue(ADC_BATT)+b_correction), x_correction);
+}
+int3float slc_TempInt()
+{
+    int3float b_correction = 0;
+    int3float x_correction = 17604;
+    return i3fM((slc_ADCGetLatestValue(ADC_TEMP_INT)+b_correction), x_correction);
+}
+int3float slc_TempBatt()
+{
+    int3float b_correction = 0;
+    int3float x_correction = 17604;
+    return i3fM((slc_ADCGetLatestValue(ADC_TEMP_BATT)+b_correction), x_correction);
+}
 /* *****************************************************************************
  End of File
  */

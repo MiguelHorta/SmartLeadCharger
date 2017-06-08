@@ -20,7 +20,6 @@ void slc_InitOscilators(uint16_t freq)
 void slc_DisableOscilators(void)
 {
     f_disabled = true;
-    slc_SetFanPWM(0);
     slc_SetBasePWM(0);
 }
 void slc_EnableOscilators(void)
@@ -115,58 +114,69 @@ void setBasePWM(uint8_t v){
 static float k_fan = 2.0;
 void onFanTick(void)
 {
-    if(f_disabled)
-        return;
     uint8_t duty_cycle = 0;
     duty_cycle = 80.0 + k_fan*(slc_TempIntValue() - working_temp);
     slc_SetFanPWM(duty_cycle);
 }
 
-static float Kp=10;     // TODO calibrar estes valore
-static float Ti=1;
-static float Td=0.1;
+static volatile int3float Kp=250;     // TODO calibrar estes valore
+static volatile int3float Ti=1;
+static volatile int3float Td=1;
 
-static float u_p=0;
-static float u=0;
-static float u_i=0;
-static float u_d=0;
-static float u_i_a=0;
-static float e_a=0;
-static float e=0;
-static float h = 1.0/CONTROL_LOOP_FREQ;   // tempo da chamada da interrupção  
-
+static int3float u_p=0;
+volatile int3float u=0;
+static int3float u_i=0;
+static int3float u_d=0;
+static int3float u_i_a=0;
+static int3float e_a=0;
+volatile int3float e=0;
+static int3float h = (1.0/CONTROL_LOOP_FREQ)*1000;   // redundant but documented
+static ControlType ct = VOLTAGE;   
 void onBaseTick(void)
 {
-    if(f_disabled)
+    if(f_disabled || isFinished() || hasErrors())
         return;
-    static ControlType ct = VOLTAGE;
     ct = getControlType();
+    if(changedStep())
+    {
+        if(ct == VOLTAGE){
+            Kp = 131000;
+            Ti = 1000;
+            Td = 1;
+        }else if(ct == CURRENT){
+            Kp = 131000;
+            Ti = 1000;
+            Td = 1;
+        }
+    }
+    OnControlTick();
     if(ct == VOLTAGE){
-        e=12-slc_BattValue();
-        u_p=Kp*(e);
-        u_d=Kp*Td*(e-e_a)/h;
-        u_i=e*Ti*h/Kp+u_i_a;
-        if(u_i>10)  // TODO ajustar estes valores das limitações
+        e= getControlValue() - slc_Vred();
+        u_p = i3fM(Kp, e);
+        u_d = i3fD(i3fM(i3fM(Kp, Td), (e-e_a)) ,h);
+        u_i = i3fD(i3fM(i3fM(e, Kp) ,h), Ti)+u_i_a;
+        /* if(u_i>10)  // TODO ajustar estes valores das limitações
             u_i=10;     
         if(u_i<-10)
-            u_i=-10;
-        u=u_p+u_d+u_i;
-        slc_SetBasePWM(u);
-        u_i_a=u_i;
-        e_a=e;
+            u_i=-10; */
+        u=u_p + u_i;//+u_d+u_i;
+        slc_SetBasePWM(u/1000); //XXX
+        u_i_a = u_i;
+        e_a = e;
     }else if(ct == CURRENT){
-        e=0.5-slc_CurrentValue();
-        u_p=Kp*(e);
-        u_d=Kp*Td*(e-e_a)/h;
-        u_i=e*Ti*h/Kp+u_i_a;
-        if(u_i>10)  // TODO ajustar estes valores das limitações
+        e = getControlValue() - slc_Current();
+        u_p = i3fM(Kp, (e));
+        u_d = i3fD(i3fM(i3fM(Kp, Td), (e-e_a)) , h);
+        u_i = i3fD(i3fM(i3fM(e, Kp) ,h), Ti)+u_i_a;
+        /*if(u_i>10)  // TODO ajustar estes valores das limitações
             u_i=10;
         if(u_i<-10)
-            u_i=-10;
-        u=u_p+u_d+u_i;
-        slc_SetBasePWM(u);
-        u_i_a=u_i;
-        e_a=e;
+            u_i=-10;*/
+        u = u_p + u_i; //+ u_d + u_i;
+        
+        slc_SetBasePWM(u/1000);
+        u_i_a = u_i;
+        e_a = e;
     }
 }
 void __attribute__( (interrupt(IPL5AUTO), vector(_TIMER_2_VECTOR))) isr_pwm(void)

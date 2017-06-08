@@ -66,6 +66,11 @@ extern "C" {
     float slc_BattValue();
     float slc_TempIntValue();
     float slc_TempBattValue();
+    int3float slc_Current();
+    int3float slc_Vred();
+    int3float slc_Batt();
+    int3float slc_TempInt();
+    int3float slc_TempBatt();
 
 #ifdef __cplusplus
 }

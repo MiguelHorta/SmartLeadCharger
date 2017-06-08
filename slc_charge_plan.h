@@ -35,7 +35,7 @@ extern "C" {
     /* Provide C++ Compatibility */
     typedef struct
     {
-        char desc[33];
+        char desc[17];
         int3float target_current;
         int3float target_voltage;
         callback next_step;
@@ -71,8 +71,9 @@ extern "C" {
     ControlType getControlType(void);
     int3float getControlValue(void);
     char const * getChargeTypeDesc(ChargeType);
-    
-    void OnCheckFaultyConditions(void);
+    void OnControlTick(void);
+    bool changedStep(void);
+    bool OnCheckFaultyConditions(void);
 #ifdef __cplusplus
 }
 #endif

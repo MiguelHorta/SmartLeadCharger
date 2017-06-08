@@ -41,7 +41,7 @@ extern "C" {
     }LcdScreen;
     
     void slc_InitLCD(void);
-
+    uint32_t getCurrentTick(void);
 #ifdef __cplusplus
 }
 #endif

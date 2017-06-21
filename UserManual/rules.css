@@ -1,0 +1,387 @@
+/* this stylesheet is used when generating a PDF with PrinceXML or any other tool that understands the CSS used. */
+/* define a page */
+@page {
+   size: A5;  
+   margin: 50pt 30pt 50pt;
+}
+.title_bubble_grey{
+  background-color: #009FBA;  
+  font-size: 9pt;
+  border-radius: 15px 50px 30px;
+  display: block;
+  color: white;
+  font-weight: bold;
+  padding: 1% 5%;
+  opacity: 1;
+}
+@page:first {
+   size: A5;  
+   margin: 0;
+}
+
+img {
+  max-width: 100%;
+}
+
+div.frontcover { 
+  page: cover; 
+  width: 100%;
+  height: 100%; 
+  margin: 0;
+  padding: 0;
+}
+div.frontcover #small-logo
+{
+  position: absolute;
+  top: 10%;
+  left: 5%;
+  width: 50%;
+  height: 20%;
+  z-index: -1;
+
+}
+div.frontcover #product_title
+{
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 24pt;
+  font-style: italic;
+  position: absolute;
+  top:25%;
+  left:10%;
+}
+div.frontcover #product_title span
+{
+  font-weight: bold;
+  text-transform: uppercase;
+}
+div.frontcover #cover-note
+{
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12pt;
+  font-weight: bold;
+  position: absolute;
+  top:45%;
+  left:10%;
+  width: 70%;
+}
+div.frontcover #cover-note2
+{
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 7pt;
+  font-weight: bold;
+  position: absolute;
+  bottom:5%;
+  right:5%;
+  width: 60%;
+}
+div.frontcover #big-logo
+{
+  position: absolute;
+  bottom: -0.5cm;
+  left: 0px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  z-index: -1;
+}
+div.frontcover #big-logo img
+{
+  width: 100%;
+  height: 100%;
+  opacity:0.2;
+  margin: 0;
+  padding: 0;
+}
+
+.contents
+{
+  display: block;
+  width: 100%;
+  height: 100%; 
+  margin: 0;
+  padding: 0;
+}
+.contents h1
+{
+  text-align: center;
+}
+.contents #contents-list
+{
+  position: absolute;
+  left: 0;
+  padding: 5% 1%;
+  width: 38%;
+  height:90%;
+  display:block;
+  background-color: rgba(0,159,186, 0.3);
+  border-radius: 15px 50px 30px;
+  border-right: solid  #333 2px; 
+  border-bottom: solid  #333 2px;
+  font-size: 8pt;
+  font-weight: bold;
+}
+.contents #contents-list ul ul
+{
+  font-size: 7pt;
+  margin-left:7pt;
+  font-weight: normal;
+  list-style: none;
+}
+ul
+{
+  margin-left: 10px; 
+}
+.contents #contents-text
+{
+  position: absolute;
+  right: 0;
+  display:block;
+  width: 55%;
+  height:100%;
+  margin-left: 5%;
+}
+.contents #contents-text p
+{
+    text-indent: 5px;
+}
+.contents::after
+{
+  clear:both;
+}
+/* styles for the right hand spread
+Bottom left we display the title of the book, bottom right the page using a CSS counter, top right the content of the current chapter */
+@page
+{
+}
+@page:right{ 
+   @bottom-left {
+       margin: 10pt 0 30pt 0;
+       border-top: .25pt solid #666;
+	   content: "Lead Battery Charger";
+       font-size: 9pt;
+       color: #333;
+   }
+   @bottom-right { 
+       margin: 10pt 0 30pt 0;
+       border-top: .25pt solid #666;
+       content: counter(page);
+       font-size: 9pt;
+   }
+   @top-right {
+   	   content:  string(doctitle);
+   	   margin: 30pt 0 10pt 0;
+   	   font-size: 9pt;
+   	   color: #333;
+   }
+}
+
+/* styles for the left hand spread 
+Bottom right book title, bottom left current page */
+@page:left {
+
+   @bottom-right {
+       margin: 10pt 0 30pt 0;
+       border-top: .25pt solid #666;
+	     content: "Lead Battery Charger";
+       font-size: 9pt;
+       color: #333;
+   }
+   @bottom-left { 
+       margin: 10pt 0 30pt 0;
+       border-top: .25pt solid #666;
+       content: counter(page);
+       font-size: 9pt;
+   }
+}
+
+/* first page */
+@page:first {
+  @bottom-left {
+    content: normal;
+    margin: 0;
+  }
+
+  @bottom-right {
+    margin: 10pt 10pt 30pt 0;
+    font-size: 9pt;
+    color: #333;
+    content: "Visit us at: http://nerd.web.ua.pt/projects/SmartLeadCharger";
+  }
+}
+
+/* reset chapter and figure counters on the body */
+body {
+	counter-reset: chapternum figurenum subchapternum;
+	font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+	line-height: 1.5;
+	font-size: 9pt;
+}
+.aviso:before
+{
+  background-image: url("assets/aviso.png");
+  background-size: 16px 16px;
+  padding-left:18px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14pt;
+  font-weight: bold;
+  content: "Aviso";
+  background-repeat: no-repeat;
+}
+.aviso_img
+{
+  background-image: url("assets/aviso.png");
+  background-size: 16px 16px;
+  padding-left: 18px;
+  display: block;
+  background-repeat: no-repeat;
+}
+.zoom_img
+{
+  background-image: url("assets/zoom.png");
+  background-size: 16px 16px;
+  padding-left: 18px;
+  display: block;
+  background-repeat: no-repeat;
+}
+h3
+{
+  line-height: 1.3;
+  margin: 0;
+  padding: 0;
+}
+/* get the title of the current chapter - this will be the content of the h1 
+reset figure counter as figures start from 1 in each chapter */
+h1 {
+    string-set: doctitle content();
+    page-break-before: always;
+    counter-reset: figurenum  subchapternum footnote;
+    line-height: 1.3;
+    font-size: 18pt;
+}
+
+h1.chapter
+{
+  background-color: #009FBA;  
+  font-size: 14pt;
+  border-radius: 15px 50px 30px;
+  display: block;
+  color: white;
+  font-weight: bold;
+  padding: 1% 5%;
+  opacity: 1;
+}
+h2.subchapter
+{
+  background-color: rgba(0,159,186, 0.6);  
+  font-size: 10pt;
+  border-radius: 15px 50px 30px;
+  display: block;
+  color: white;
+  font-weight: bold;
+  padding: 1% 5%;
+}
+h2.subchapter:before {
+    counter-increment: subchapternum;
+    content: counter(chapternum, upper-latin) "-"counter(subchapternum) ". ";
+}
+/* increment chapter counter */
+h1.chapter:before {
+    counter-increment: chapternum;
+    content: counter(chapternum, upper-latin) ". ";
+}
+
+/* increment and display figure counter */
+figcaption:before {
+	counter-increment: figurenum;
+	content: counter(chapternum) "-" counter(figurenum) ". ";
+}
+
+/* footnotes */
+.fn {
+  float: footnote;
+}
+
+.fn {
+  counter-increment: footnote;
+}
+
+.fn::footnote-call {
+  content: counter(footnote);
+  font-size: 9pt;
+  vertical-align: super;
+  line-height: none;
+}
+
+.fn::footnote-marker {
+  font-weight: bold;
+}
+
+@page {
+  @footnotes {
+    border-top: 0.6pt solid black;
+    padding-top: 8pt;
+  }
+}
+
+h1,h2,h3,h4,h5 {
+	font-weight: bold;
+	page-break-after: avoid;
+	page-break-inside:avoid;
+}
+
+h1+p, h2+p, h3+p {
+	page-break-before: avoid;
+}
+
+table, figure {
+	page-break-inside: avoid;
+}
+
+ul.toc {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+/* create page numbers using target-counter in the TOC */
+ul.toc a::after {
+  content: leader('.') target-counter(attr(href), page);
+}
+
+ul.toc li {
+	line-height: 2;
+}
+
+ul.toc li a {
+	text-decoration: none;
+}
+
+a {
+	color: #000;
+}
+
+/* add page number to cross references */
+a.xref:after {
+  content: " (page " target-counter(attr(href, url), page) ")";
+}
+
+table.instrucoes
+{
+  width: 100%;
+}
+.instrucoes tr td:first-child
+{
+  width: 5%;
+}
+.instrucoes tr td:nth-child(2)
+{
+  width: 50%;
+}
+.instrucoes tr td:nth-child(3)
+{
+  width: 45%;
+}
+.instrucoes img
+{
+  width: 100%;
+}

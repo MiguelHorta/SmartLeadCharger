@@ -45,7 +45,7 @@ int slc_ADCInit(void)
 	/* Interruptions */
 	IFS1bits.AD1IF = 0;
 	IEC1bits.AD1IE = 1;
-	IPC6bits.AD1IP = 5;
+	IPC6bits.AD1IP = 6;
 	/*end - Interruptions*/
 	/*ADC*/
 	AD1CON1bits.SSRC = 7;       // Internal counter ends sampling and starts conversion
@@ -91,7 +91,7 @@ int3float slc_ADCGetLatestValue(uint16_t channel)
     slc_clamp(&channel, 0, 15);
 	return _adc_aquisitions[channel].value;	
 }
-void __attribute__( (interrupt(IPL5AUTO), vector(_ADC_VECTOR))) isr_adc(void)
+void __attribute__( (interrupt(IPL6AUTO), vector(_ADC_VECTOR))) isr_adc(void)
 {
 	uint16_t *p_buff = (uint16_t*)(&ADC1BUF0);
     int i;

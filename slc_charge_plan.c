@@ -12,6 +12,7 @@ static uint32_t duration = 0;
 static bool is_finished = true;
 static bool has_errors = false;
 static bool changed_step = true;
+static uint8_t acummulatedCharge;
 
 const char ChargeTypeDesc[][14] = {
     "Smart charge ",
@@ -63,19 +64,19 @@ bool SmartChargeStep3(int3float iout,int3float vout,int3float text)
 }
 ChargeStep smart_charge[SMART_CHARGE_STEPS] = {
     {
-        "0.2A to battery.",
+        "Constant current",
         100,
         0,
         &SmartChargeStep1,
     },
     {
-        "14.7V to battery",
+        "Over voltage",
         0,
         6000,
         &SmartChargeStep2,
     },
     {
-        "12V to battery.",
+        "Trickle charge",
         0,
         6000,
         &SmartChargeStep3,
@@ -112,8 +113,8 @@ ChargeStep* stored_plans[PLAN_COUNT] = {smart_charge, fast_charge, slow_charge};
 void SmartChargeUpdate(void)
 {
     stored_plans[f_active_plan][0].target_current = f_target_capacity*0.25;
-    stored_plans[f_active_plan][1].target_voltage = f_target_cells*2.45;
-    stored_plans[f_active_plan][2].target_voltage = f_target_cells*2.35;
+    stored_plans[f_active_plan][1].target_voltage = f_target_cells*2.45*1000;
+    stored_plans[f_active_plan][2].target_voltage = f_target_cells*2.35*1000;
 }
 void FastChargeUpdate(void)
 {
@@ -158,6 +159,10 @@ char const * getChargeTypeDesc(ChargeType ct)
 {
     return ChargeTypeDesc[ct];
 }
+char const * getChargeStepDesc(void)
+{
+    return stored_plans[f_active_plan][f_charge_step].desc;
+}
 bool OnCheckFaultyConditions(void)
 {
     /*if(slc_Vred() < 1000 && slc_Current() < 100)
@@ -197,6 +202,7 @@ void OnControlTick(void)
         has_errors = true;
         stopCharge();
     }
+    duration = getCurrentTick() - start_time;
     changed_step = false;
 }
 
@@ -207,7 +213,7 @@ bool changedStep()
 void setBatteryCells(uint8_t v)
 {
     f_target_cells = v;
-    f_target_voltage = 2.45*v;
+    f_target_voltage = 2.45*v*1000;
 }
 uint8_t getBatteryCells(void)
 {
@@ -217,9 +223,18 @@ void startCharge(void)
 {
     slc_EnableOscilators();
     start_time = getCurrentTick();
+    acummulatedCharge = 0;
     is_finished = false;
     has_errors = false;
     f_charge_step = 0;
     changed_step = true;
     (*plans_update[f_active_plan])();
+}
+uint8_t slc_EstimatedChargePercentage()
+{
+    return acummulatedCharge;
+}
+uint32_t slc_ChargeTime()
+{
+    return duration;
 }

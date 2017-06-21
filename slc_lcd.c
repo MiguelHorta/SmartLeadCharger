@@ -26,11 +26,12 @@ typedef enum LcdStates
     CUSTOM_OUTPUT_INPUT_PWM = 0x10,//xxx
     CHARGING_STATE_0 = 0x11,//xxx
     CHARGING_STATE_1 = 0x12,//xxx
-    CONFIRM_CANCEL_CHARGE = 0x13,
-    POST_CHARGE_STATS = 0x14, //xxx
-    ERROR_OCCURRED = 0x15,//xxx
-    START_CHARGE_CELLS = 0x16, //xxx
-    START_CHARGE_CAPACITY = 0x17,//xxx Nao da para baterias de > 10_000
+    CHARGING_STATE_2 = 0x13, 
+    CONFIRM_CANCEL_CHARGE = 0x14,
+    POST_CHARGE_STATS = 0x15, //xxx
+    ERROR_OCCURRED = 0x16,//xxx
+    START_CHARGE_CELLS = 0x17, //xxx
+    START_CHARGE_CAPACITY = 0x18,//xxx Nao da para baterias de > 10_000
 }LcdStates;
 
 #define LCD_INPUT_LENGHT 5
@@ -397,7 +398,7 @@ void StartChargeChooseTypePlus(void) {
 
 void OnStartChargeConfirm(void) {
     static char str[33];
-    sprintf(str, "%-16s%02.1fV - %06uC", getChargeTypeDesc(getType()), getBatteryVoltage()/1000.0, getCapacity());
+    sprintf(str, "%-16s%02.1fV - %uC", getChargeTypeDesc(getType()), getBatteryVoltage()/1000.0, getCapacity());
     TM_HD44780_Clear();
     TM_HD44780_Puts(0, 0, str);
 }
@@ -430,7 +431,7 @@ void OnStartDischargeInput(void) {
     TM_HD44780_Puts(0, 0, "Max current:    I: 00000");
     lcd_input_pivot = 0;
     lcd_edit = false;
-    //lcd_input = {'0', '0', '2', '0', '0'};
+    memset(&lcd_input[0], 0x30, sizeof(lcd_input));lcd_input[LCD_INPUT_LENGHT] = '\0';
     TM_HD44780_PutCustom(LCD_INPUT_FIRST + LCD_INPUT_LENGHT, 1, 0x7E);
     TM_HD44780_CursorOn();
     TM_HD44780_BlinkOff();
@@ -503,6 +504,7 @@ static char custom_output_options[options_count][16] = {
 };
 void OnCustomOutputChooser(void) {
     lcd_input_pivot = 0;
+    memset(&lcd_input[0], 0x30, sizeof(lcd_input));lcd_input[LCD_INPUT_LENGHT] = '\0';
     TM_HD44780_BlinkOn();
     TM_HD44780_CursorSet(0, 0);
     ScreenScrollUpate( lcd_input_pivot, options_count, &custom_output_options);
@@ -544,7 +546,7 @@ void OnCustomOutputChooserInputPWM(void) {
     TM_HD44780_Puts(0, 0,str );
     lcd_input_pivot = 0;
     lcd_edit = false;
-    //lcd_input = {'0', '0', '2', '0', '0'};
+    memset(&lcd_input[0], 0x30, sizeof(lcd_input));lcd_input[LCD_INPUT_LENGHT] = '\0';
     TM_HD44780_PutCustom(LCD_INPUT_FIRST + LCD_INPUT_LENGHT, 1, 0x7E);
     TM_HD44780_CursorOn();
     TM_HD44780_BlinkOff();
@@ -612,7 +614,7 @@ void CustomOutputChooserInputPWMPlus(void) {
 
 void OnChargingState0(void) {
     TM_HD44780_Clear();
-    TM_HD44780_Puts(0, 0, "Charging 0");
+    TM_HD44780_Puts(0, 0, "Acquiring");
 }
 
 void OnChargingState0Tick(void) {
@@ -620,10 +622,14 @@ void OnChargingState0Tick(void) {
         ChangeState(ERROR_OCCURRED);
     if(isFinished())
         ChangeState(POST_CHARGE_STATS);
+    static char str[33];
+    sprintf(str, "Voltage: %3.3fVCurrent: %3.3fA", slc_VredValue(), slc_CurrentValue());
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, str);
 }
 
 void ChargingState0Ok(void) {
-    0;
+    ChangeState(CHARGING_STATE_0);
 }
 
 void ChargingState0Cancel(void) {
@@ -631,18 +637,18 @@ void ChargingState0Cancel(void) {
 }
 
 void ChargingState0Minus(void) {
-    0;
+    ChangeState(CHARGING_STATE_2);
 }
 
 void ChargingState0Plus(void) {
-    0;
+    ChangeState(CHARGING_STATE_1);
 }
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="ChargingState1 callbacks">
 
 void OnChargingState1(void) {
     TM_HD44780_Clear();
-    TM_HD44780_Puts(0, 0, "Charging 1");
+    TM_HD44780_Puts(0, 0, "Acquiring");
 }
 
 void OnChargingState1Tick(void) {
@@ -650,10 +656,14 @@ void OnChargingState1Tick(void) {
         ChangeState(ERROR_OCCURRED);
     if(isFinished())
         ChangeState(POST_CHARGE_STATS);
+    static char str[33];
+    sprintf(str, "TBatt: %3.3f\xdf""C TInter: %3.3f\xdf""C", slc_TempIntValue(), slc_TempBattValue());
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, str);
 }
 
 void ChargingState1Ok(void) {
-    ChangeState(CHARGING_STATE_0);;
+    ChangeState(CHARGING_STATE_0);
 }
 
 void ChargingState1Cancel(void) {
@@ -665,6 +675,40 @@ void ChargingState1Minus(void) {
 }
 
 void ChargingState1Plus(void) {
+    ChangeState(CHARGING_STATE_2);
+}
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="ChargingState2 callbacks">
+
+void OnChargingState2(void) {
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, "Acquiring");
+}
+
+void OnChargingState2Tick(void) {
+    if(hasErrors())
+        ChangeState(ERROR_OCCURRED);
+    if(isFinished())
+        ChangeState(POST_CHARGE_STATS);
+    static char str[33];
+    sprintf(str, "%-16s%u - %u", getChargeStepDesc(), slc_ChargeTime(), slc_EstimatedChargePercentage());
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, str);
+}
+
+void ChargingState2Ok(void) {
+    ChangeState(CHARGING_STATE_0);
+}
+
+void ChargingState2Cancel(void) {
+    ChangeState(CONFIRM_CANCEL_CHARGE);
+}
+
+void ChargingState2Minus(void) {
+    ChangeState(CHARGING_STATE_1);
+}
+
+void ChargingState2Plus(void) {
     ChangeState(CHARGING_STATE_0);
 }
 // </editor-fold>
@@ -703,6 +747,8 @@ void OnPostChargeStatus(void) {
 }
 
 void OnPostChargeStatusTick(void) {
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, "FIM Status here");
 }
 
 void PostChargeStatusOk(void) {
@@ -721,7 +767,7 @@ void PostChargeStatusPlus(void) {
     0;
 }
 // </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="ChargingState1 callbacks">
+// <editor-fold defaultstate="collapsed" desc="Error callbacks">
 
 void OnErrorOccurred(void) {
     TM_HD44780_Clear();
@@ -729,6 +775,8 @@ void OnErrorOccurred(void) {
 }
 
 void OnErrorOccurredTick(void) {
+    TM_HD44780_Clear();
+    TM_HD44780_Puts(0, 0, "ERROR OCCURRED!!");
 }
 
 void ErrorOccurredOk(void) {
@@ -754,7 +802,7 @@ void OnStartChargeCells(void) {
     TM_HD44780_Puts(0, 0, "Cell Number:    C: 00000");
     lcd_input_pivot = 0;
     lcd_edit = false;
-    //lcd_input = {'0', '0', '2', '0', '0'};
+    memset(&lcd_input[0], 0x30, sizeof(lcd_input));lcd_input[LCD_INPUT_LENGHT] = '\0';
     TM_HD44780_PutCustom(LCD_INPUT_FIRST + LCD_INPUT_LENGHT, 1, 0x7E);
     TM_HD44780_CursorOn();
     TM_HD44780_BlinkOff();
@@ -825,7 +873,7 @@ void OnStartChargeCapacity(void) {
     TM_HD44780_Puts(0, 0, "Batt capacity:  C: 00000");
     lcd_input_pivot = 0;
     lcd_edit = false;
-    //lcd_input = {'0', '0', '2', '0', '0'};
+    memset(&lcd_input[0], 0x30, sizeof(lcd_input));lcd_input[LCD_INPUT_LENGHT] = '\0';
     TM_HD44780_PutCustom(LCD_INPUT_FIRST + LCD_INPUT_LENGHT, 1, 0x7E);
     TM_HD44780_CursorOn();    
     TM_HD44780_BlinkOff();
@@ -840,6 +888,7 @@ void StartChargeCapacityOk(void) {
     if (lcd_input_pivot == LCD_INPUT_LENGHT) {
         // done
         TM_HD44780_CursorOff();
+        TM_HD44780_BlinkOff();
         setCapacity(atoi(lcd_input));
         ChangeState(START_CHARGE_CONFIRM);
     } else if (lcd_edit) {
@@ -895,7 +944,7 @@ void DoNop(void)
 }
 static LcdScreen lcd_screens[] =
 {
-    {
+    {//0
       &OnDiagnosis,
       &OnDiagnosisTick,
       &DiagnosisMinus,
@@ -967,7 +1016,7 @@ static LcdScreen lcd_screens[] =
       &SensorsTEMPINTCancel,
       &SensorsTEMPINTOk
     },
-    {
+    {//9
       &OnSensorsTEMPEXT,
       &OnSensorsTEMPEXTTick,
       &SensorsTEMPEXTMinus,
@@ -1015,7 +1064,7 @@ static LcdScreen lcd_screens[] =
       &CustomOutputChooserCancel,
       &CustomOutputChooserOk
     },
-    {
+    {//F
       &DoNop,
       &DoNop,
       &DoNop,
@@ -1046,6 +1095,14 @@ static LcdScreen lcd_screens[] =
       &ChargingState1Plus,
       &ChargingState1Cancel,
       &ChargingState1Ok,
+    },
+    {//13
+      &OnChargingState2,
+      &OnChargingState2Tick,
+      &ChargingState2Minus,
+      &ChargingState2Plus,
+      &ChargingState2Cancel,
+      &ChargingState2Ok,
     },
     {
       &OnConfirmCancelCharge,

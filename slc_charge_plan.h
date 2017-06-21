@@ -74,9 +74,12 @@ extern "C" {
     ControlType getControlType(void);
     int3float getControlValue(void);
     char const * getChargeTypeDesc(ChargeType);
+    char const * getChargeStepDesc(void);
     void OnControlTick(void);
     bool changedStep(void);
     bool OnCheckFaultyConditions(void);
+    uint8_t slc_EstimatedChargePercentage();
+    uint32_t slc_ChargeTime();
 #ifdef __cplusplus
 }
 #endif

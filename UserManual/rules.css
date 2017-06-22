@@ -385,3 +385,16 @@ table.instrucoes
 {
   width: 100%;
 }
+
+.problems_solve
+{
+  width: 100%;
+  border: solid 1px black;
+  border-collapse: collapse;
+}
+
+.problems_solve tr td 
+{
+    border: solid 1px black;
+  border-collapse: collapse;
+}

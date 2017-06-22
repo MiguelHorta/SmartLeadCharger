@@ -398,3 +398,19 @@ table.instrucoes
     border: solid 1px black;
   border-collapse: collapse;
 }
+.seguranca  
+{width: 100%;
+  border: solid 1px black;
+  border-collapse: collapse;
+  page-break-inside: auto;
+}
+.seguranca td 
+{
+    width: 50%;
+    padding: 5px;
+}
+.seguranca tr td 
+{
+    border: solid 1px black;
+  border-collapse: collapse;
+}

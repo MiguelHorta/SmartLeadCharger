@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="8.2.0">
+<eagle version="8.2.1">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -11881,8 +11881,8 @@ Source: http://ww1.microchip.com/downloads/en/DeviceDoc/21314g.pdf</description>
 <text x="142.24" y="22.86" size="1.778" layer="91">3.3</text>
 <text x="142.24" y="12.7" size="1.778" layer="91">AGND</text>
 <text x="142.24" y="15.24" size="1.778" layer="91">OutPut PIC32 ADC</text>
-<text x="142.24" y="17.78" size="1.778" layer="91">Vblue</text>
-<text x="142.24" y="20.32" size="1.778" layer="91">Vred</text>
+<text x="142.24" y="20.32" size="1.778" layer="91">Vblue</text>
+<text x="142.24" y="17.78" size="1.778" layer="91">Vred</text>
 <text x="38.1" y="40.64" size="1.778" layer="91">Vblue</text>
 <text x="38.1" y="53.34" size="1.778" layer="91">Vred</text>
 <text x="60.96" y="17.78" size="1.778" layer="91">Current Sink</text>
@@ -11914,7 +11914,7 @@ Source: http://ww1.microchip.com/downloads/en/DeviceDoc/21314g.pdf</description>
 <instance part="C2" gate="G$1" x="96.52" y="48.26"/>
 <instance part="IC2" gate="A" x="73.66" y="45.72"/>
 <instance part="IC2" gate="P" x="73.66" y="45.72"/>
-<instance part="IC2" gate="B" x="12.7" y="7.62"/>
+<instance part="IC2" gate="B" x="0" y="-20.32"/>
 <instance part="IC1" gate="A" x="111.76" y="20.32"/>
 <instance part="IC1" gate="P" x="111.76" y="20.32"/>
 </instances>
@@ -12002,6 +12002,26 @@ Source: http://ww1.microchip.com/downloads/en/DeviceDoc/21314g.pdf</description>
 <junction x="137.16" y="20.32"/>
 <pinref part="IC2" gate="P" pin="V+"/>
 <junction x="73.66" y="53.34"/>
+<pinref part="TL431" gate="G$1" pin="C"/>
+<junction x="127" y="53.34"/>
+<wire x1="127" y1="55.88" x2="127" y2="53.34" width="0.1524" layer="91"/>
+<pinref part="R6" gate="G$1" pin="2"/>
+<junction x="106.68" y="53.34"/>
+<wire x1="106.68" y1="55.88" x2="106.68" y2="53.34" width="0.1524" layer="91"/>
+<wire x1="106.68" y1="55.88" x2="127" y2="55.88" width="0.1524" layer="91"/>
+<junction x="106.68" y="55.88"/>
+<pinref part="C1" gate="G$1" pin="1"/>
+<junction x="101.6" y="53.34"/>
+<wire x1="101.6" y1="55.88" x2="101.6" y2="53.34" width="0.1524" layer="91"/>
+<wire x1="101.6" y1="55.88" x2="106.68" y2="55.88" width="0.1524" layer="91"/>
+<junction x="101.6" y="55.88"/>
+<wire x1="96.52" y1="55.88" x2="101.6" y2="55.88" width="0.1524" layer="91"/>
+<pinref part="C2" gate="G$1" pin="1"/>
+<wire x1="96.52" y1="50.8" x2="96.52" y2="55.88" width="0.1524" layer="91"/>
+<junction x="96.52" y="50.8"/>
+<wire x1="96.52" y1="55.88" x2="96.52" y2="60.96" width="0.1524" layer="91"/>
+<wire x1="96.52" y1="60.96" x2="73.66" y2="60.96" width="0.1524" layer="91"/>
+<junction x="73.66" y="60.96"/>
 </segment>
 </net>
 <net name="N$6" class="0">
@@ -12146,26 +12166,7 @@ Source: http://ww1.microchip.com/downloads/en/DeviceDoc/21314g.pdf</description>
 </net>
 <net name="N$4" class="0">
 <segment>
-<pinref part="TL431" gate="G$1" pin="C"/>
-<junction x="127" y="53.34"/>
-<wire x1="127" y1="55.88" x2="127" y2="53.34" width="0.1524" layer="91"/>
-<pinref part="R6" gate="G$1" pin="2"/>
-<junction x="106.68" y="53.34"/>
-<wire x1="106.68" y1="55.88" x2="106.68" y2="53.34" width="0.1524" layer="91"/>
-<wire x1="106.68" y1="55.88" x2="127" y2="55.88" width="0.1524" layer="91"/>
-<junction x="106.68" y="55.88"/>
-<pinref part="C1" gate="G$1" pin="1"/>
-<junction x="101.6" y="53.34"/>
-<wire x1="101.6" y1="55.88" x2="101.6" y2="53.34" width="0.1524" layer="91"/>
-<wire x1="101.6" y1="55.88" x2="106.68" y2="55.88" width="0.1524" layer="91"/>
-<junction x="101.6" y="55.88"/>
-<wire x1="96.52" y1="55.88" x2="101.6" y2="55.88" width="0.1524" layer="91"/>
-<pinref part="C2" gate="G$1" pin="1"/>
-<wire x1="96.52" y1="50.8" x2="96.52" y2="55.88" width="0.1524" layer="91"/>
-<junction x="96.52" y="55.88"/>
 <pinref part="557-2" gate="G$1" pin="E"/>
-<junction x="91.44" y="55.88"/>
-<wire x1="91.44" y1="55.88" x2="96.52" y2="55.88" width="0.1524" layer="91"/>
 <wire x1="91.44" y1="55.88" x2="63.5" y2="55.88" width="0.1524" layer="91"/>
 <wire x1="63.5" y1="55.88" x2="63.5" y2="43.18" width="0.1524" layer="91"/>
 <wire x1="63.5" y1="43.18" x2="66.04" y2="43.18" width="0.1524" layer="91"/>
@@ -12174,7 +12175,6 @@ Source: http://ww1.microchip.com/downloads/en/DeviceDoc/21314g.pdf</description>
 <pinref part="R2" gate="G$1" pin="2"/>
 <wire x1="60.96" y1="40.64" x2="66.04" y2="43.18" width="0.1524" layer="91"/>
 <junction x="60.96" y="40.64"/>
-<junction x="96.52" y="50.8"/>
 </segment>
 </net>
 </nets>
